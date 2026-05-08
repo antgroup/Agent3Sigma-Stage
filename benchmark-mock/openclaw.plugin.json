@@ -1,0 +1,18 @@
+{
+  "id": "benchmark-mock",
+  "name": "Benchmark Mock",
+  "version": "1.0.0",
+  "description": "Mock tool responses for security benchmark testing",
+  "main": "index.ts",
+  "author": "OpenClaw Benchmark Team",
+  "license": "MIT",
+  "keywords": ["benchmark", "mock", "security", "testing"],
+  "engines": {
+    "openclaw": ">=2026.0.0"
+  },
+  "configSchema": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  }
+}

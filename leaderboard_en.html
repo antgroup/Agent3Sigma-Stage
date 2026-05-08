@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent3Sigma-Stage Security Evaluation Leaderboard</title>
+<style>
+:root {
+    --bg: #f0f4f8; --card: #fff; --text: #1e293b; --sub: #64748b; --muted: #94a3b8;
+    --border: #e2e8f0; --green: #10b981; --red: #ef4444; --blue: #0ea5e9;
+    --purple: #8b5cf6; --orange: #f59e0b; --gold: #eab308; --indigo: #6366f1;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 40px rgba(0,0,0,0.1);
+    --radius: 16px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+
+/* ── Methodology ── */
+.methodology { margin: 24px 0 0; padding: 16px 20px; background: var(--card); border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+.methodology-header { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+.methodology-header h3 { font-size: 14px; color: var(--text); font-weight: 600; }
+.methodology-header .toggle-icon { font-size: 12px; color: var(--sub); transition: transform 0.2s; }
+.methodology-header.open .toggle-icon { transform: rotate(90deg); }
+.methodology-body { display: none; margin-top: 12px; }
+.methodology-body.open { display: block; }
+.formula-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.formula-card { padding: 12px 16px; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 10px; border: 1px solid var(--border); }
+.formula-card .f-name { font-size: 12px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.formula-card .f-expr { font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace; color: var(--text); line-height: 1.5; }
+.formula-card .f-expr .var { color: var(--blue); font-weight: 600; }
+.formula-card .f-expr .op { color: var(--sub); }
+.formula-card .f-note { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+
+/* ── Header ── */
+.hero { background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #a855f7 100%); color: white; padding: 48px 32px 40px; text-align: center; margin-bottom: 24px; border-radius: 0 0 20px 20px; box-shadow: 0 8px 30px rgba(99,102,241,0.2); position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; pointer-events: none; animation: heroShimmer 20s linear infinite; }
+@keyframes heroShimmer { from { transform: translateY(0); } to { transform: translateY(-20px); } }
+.hero h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+.hero p { opacity: 0.85; font-size: 15px; }
+.hero .stats { display: flex; justify-content: center; gap: 36px; margin-top: 20px; }
+.hero .stat { text-align: center; }
+.hero .stat-val { font-size: 28px; font-weight: 700; }
+.hero .stat-label { font-size: 12px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+
+/* ── Summary Cards ── */
+.cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 28px; }
+.card { background: var(--card); border-radius: 12px; padding: 18px 16px; box-shadow: var(--shadow-md); text-align: center; border-top: 3px solid var(--border); animation: fadeUp 0.5s ease both; }
+.card:nth-child(1) { border-top-color: var(--blue); animation-delay: 0.05s; }
+.card:nth-child(2) { border-top-color: var(--green); animation-delay: 0.1s; }
+.card:nth-child(3) { border-top-color: var(--indigo); animation-delay: 0.15s; }
+.card:nth-child(4) { border-top-color: var(--green); animation-delay: 0.2s; }
+.card:nth-child(5) { border-top-color: var(--purple); animation-delay: 0.25s; }
+.card:nth-child(6) { border-top-color: var(--red); animation-delay: 0.3s; }
+.card .c-label { font-size: 11px; color: var(--sub); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
+.card .c-val { font-size: 22px; font-weight: 700; }
+.card .c-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.card { transition: transform 0.25s, box-shadow 0.25s; }
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Tabs ── */
+.tab-nav { display: flex; gap: 6px; margin-bottom: 24px; background: var(--card); border-radius: 12px; padding: 6px; box-shadow: var(--shadow-sm); align-items: center; }
+.tab-btn { flex: 1; padding: 10px 16px; border: none; border-radius: 8px; background: transparent; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--sub); transition: all 0.25s; }
+.tab-btn:hover { background: #f1f5f9; color: var(--text); }
+.tab-btn.active { background: linear-gradient(135deg, #0ea5e9, #6366f1); color: white; box-shadow: 0 2px 8px rgba(99,102,241,0.3); }
+.tab-panel { display: none; animation: fadeUp 0.3s ease; }
+.tab-panel.active { display: block; }
+
+/* ── Main Table ── */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); box-shadow: var(--shadow-md); margin-bottom: 8px; }
+.table-note { font-size: 11px; color: var(--muted); margin: 4px 0 24px; padding-left: 4px; }
+.lb { width: 100%; border-collapse: collapse; background: var(--card); font-variant-numeric: tabular-nums; }
+.lb thead { background: linear-gradient(135deg, #1e293b, #334155); color: white; position: sticky; top: 0; z-index: 10; }
+.lb th { padding: 14px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; cursor: pointer; user-select: none; transition: background 0.15s; }
+.lb th:hover { background: rgba(255,255,255,0.08); }
+.lb th .arrow { font-size: 9px; margin-left: 3px; opacity: 0.35; }
+.lb th.active .arrow { opacity: 1; }
+.lb .th-sub { font-size: 9px; font-weight: 400; opacity: 0.6; display: block; margin-top: 1px; text-transform: none; }
+.lb td { padding: 12px 14px; text-align: center; border-bottom: 1px solid var(--border); font-size: 13px; }
+.lb tbody tr { transition: background 0.15s; }
+.lb tbody tr:nth-child(even) { background: #fafbfc; }
+.lb tbody tr:hover { background: #eef2ff; box-shadow: inset 3px 0 0 var(--indigo); }
+.lb tbody tr:last-child td { border-bottom: none; }
+.lb .rk { font-size: 16px; font-weight: 700; min-width: 36px; display: inline-block; }
+.lb .rk-1 { color: var(--gold); }
+.lb .rk-2 { color: #94a3b8; }
+.lb .rk-3 { color: #cd7f32; }
+.lb .mdl { text-align: left !important; font-weight: 600; font-size: 14px; white-space: nowrap; }
+.lb .os { font-size: 18px; font-weight: 700; }
+.g { color: var(--green); font-weight: 600; }
+.w { color: var(--orange); font-weight: 600; }
+.b { color: var(--red); font-weight: 600; }
+.lb .sep { border-left: 2px solid rgba(255,255,255,0.15); }
+.lb tbody .sep { border-left: 2px solid var(--border); }
+
+
+/* ── Sticky Columns ── */
+.lb th:nth-child(1), .lb td:nth-child(1) { position: sticky; left: 0; z-index: 6; }
+.lb th:nth-child(2), .lb td:nth-child(2) { position: sticky; left: 50px; z-index: 6; }
+.lb thead th:nth-child(1), .lb thead th:nth-child(2) { z-index: 12; }
+.lb td:nth-child(1) { background: var(--card); }
+.lb td:nth-child(2) { background: var(--card); box-shadow: 2px 0 4px rgba(0,0,0,0.04); }
+.lb tbody tr:nth-child(even) td:nth-child(1),
+.lb tbody tr:nth-child(even) td:nth-child(2) { background: #fafbfc; }
+.lb tbody tr:hover td:nth-child(1),
+.lb tbody tr:hover td:nth-child(2) { background: #eef2ff; }
+.lb thead th:nth-child(2) { box-shadow: 2px 0 4px rgba(0,0,0,0.1); }
+
+/* ── Tooltip ── */
+.lb th[data-tip] { position: relative; }
+.lb th[data-tip]::after { content: attr(data-tip); position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%) scale(0.9); background: #1e293b; color: #f1f5f9; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 400; white-space: nowrap; z-index: 30; pointer-events: none; opacity: 0; transition: opacity 0.2s, transform 0.2s; text-transform: none; letter-spacing: 0; }
+.lb th[data-tip]:hover::after { opacity: 1; transform: translateX(-50%) scale(1); }
+/* ── Bar Charts ── */
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+.ch { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-md); }
+.ch h3 { font-size: 14px; margin-bottom: 14px; color: var(--text); font-weight: 600; }
+.brow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.brow:last-child { margin-bottom: 0; }
+.blbl { width: 150px; font-size: 12px; font-weight: 500; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btrk { flex: 1; height: 22px; background: #f1f5f9; border-radius: 6px; overflow: hidden; }
+.bval { height: 100%; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 11px; font-weight: 600; color: white; min-width: 32px; }
+
+/* ── Heatmap ── */
+.hm-section { margin-bottom: 28px; }
+.hm-section h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+.hm-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.hm-controls label { font-size: 12px; color: var(--sub); font-weight: 500; }
+.hm-controls select { padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; background: var(--card); color: var(--text); cursor: pointer; }
+.hm-wrap { overflow-x: auto; border-radius: var(--radius); box-shadow: var(--shadow-md); }
+.hm { width: 100%; border-collapse: collapse; background: var(--card); font-variant-numeric: tabular-nums; }
+.hm th { padding: 10px 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; background: #f8fafc; border-bottom: 2px solid var(--border); white-space: nowrap; }
+.hm th:first-child { text-align: left; min-width: 160px; }
+.hm td { padding: 8px 10px; text-align: center; font-size: 12px; font-weight: 600; border-bottom: 1px solid #f1f5f9; }
+.hm td:first-child { text-align: left; font-weight: 500; white-space: nowrap; }
+.hm tbody tr:hover { filter: brightness(0.97); }
+.hm .cell { display: inline-block; padding: 4px 10px; border-radius: 6px; min-width: 52px; }
+.hm .na { color: var(--muted); font-weight: 400; }
+
+/* ── Risk Average Chart ── */
+.risk-avg { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-md); margin-top: 20px; }
+.risk-avg h3 { font-size: 14px; margin-bottom: 14px; font-weight: 600; }
+
+/* ── Language Switch ── */
+.lang-switch { position: absolute; top: 16px; right: 24px; display: flex; background: rgba(255,255,255,0.15); border-radius: 8px; overflow: hidden; backdrop-filter: blur(4px); }
+.lang-btn { border: none; background: transparent; color: rgba(255,255,255,0.7); padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.lang-btn.active { background: rgba(255,255,255,0.25); color: white; }
+.lang-btn:hover:not(.active) { color: white; background: rgba(255,255,255,0.1); }
+
+
+/* ── Dark Mode ── */
+[data-theme="dark"] { --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --sub: #94a3b8; --muted: #64748b; --border: #334155; --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 20px rgba(0,0,0,0.3); --shadow-lg: 0 10px 40px rgba(0,0,0,0.4); }
+[data-theme="dark"] .lb thead { background: linear-gradient(135deg, #0f172a, #1e293b); }
+[data-theme="dark"] .lb tbody tr:nth-child(even) { background: #162032; }
+[data-theme="dark"] .lb tbody tr:hover { background: #1e2a4a; }
+[data-theme="dark"] .lb tbody tr:hover td:nth-child(1),
+[data-theme="dark"] .lb tbody tr:hover td:nth-child(2) { background: #1e2a4a; }
+[data-theme="dark"] .lb tbody tr:nth-child(even) td:nth-child(1),
+[data-theme="dark"] .lb tbody tr:nth-child(even) td:nth-child(2) { background: #162032; }
+[data-theme="dark"] .lb td:nth-child(1),
+[data-theme="dark"] .lb td:nth-child(2) { background: var(--card); }
+[data-theme="dark"] .hm th { background: #162032; }
+[data-theme="dark"] .hm td { border-bottom-color: #334155; }
+[data-theme="dark"] .btrk { background: #334155; }
+[data-theme="dark"] .formula-card { background: linear-gradient(135deg, #162032 0%, #1e293b 100%); }
+[data-theme="dark"] .hero { box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+[data-theme="dark"] .lb th[data-tip]::after { background: #f1f5f9; color: #1e293b; }
+.theme-toggle { position: absolute; top: 16px; right: 140px; background: rgba(255,255,255,0.15); border: none; border-radius: 8px; padding: 6px 12px; font-size: 16px; cursor: pointer; backdrop-filter: blur(4px); transition: background 0.2s; line-height: 1; }
+.theme-toggle:hover { background: rgba(255,255,255,0.25); }
+
+/* ── Export Button ── */
+.export-btn { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--sub); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+.export-btn:hover { background: var(--bg); color: var(--text); border-color: var(--indigo); }
+/* ── Footer ── */
+footer { text-align: center; padding: 32px 20px; color: var(--muted); font-size: 12px; }
+
+@media (max-width: 1100px) {
+    .cards { grid-template-columns: repeat(3, 1fr); }
+    .charts { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+    .hero { padding: 24px 14px 20px; }
+    .hero h1 { font-size: 20px; }
+    .hero .stats { gap: 14px; flex-wrap: wrap; }
+    .container { padding: 0 12px; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .tab-nav { flex-wrap: wrap; }
+    .lb th, .lb td { padding: 8px 6px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Toggle dark mode">🌙</button>
+    <div class="lang-switch">
+        <button class="lang-btn" data-lang="zh" onclick="switchLang('zh')">中</button>
+        <button class="lang-btn active" data-lang="en" onclick="switchLang('en')">EN</button>
+    </div>
+    <h1>Agent3Sigma-Stage Security Evaluation Leaderboard</h1>
+    <p id="hero-subtitle">AI 智能体安全性与有用性综合评测</p>
+    <div class="stats">
+        <div class="stat"><div class="stat-val">15</div><div class="stat-label" data-i18n="models">模型数</div></div>
+        <div class="stat"><div class="stat-val">17,250</div><div class="stat-label" data-i18n="totalTests">测试总数</div></div>
+        <div class="stat"><div class="stat-val">1,150</div><div class="stat-label" data-i18n="testsPerModel">每组测试数</div></div>
+        <div class="stat"><div class="stat-val">6</div><div class="stat-label" data-i18n="scenarios">场景数</div></div>
+        <div class="stat"><div class="stat-val">10</div><div class="stat-label" data-i18n="riskTypes">风险类型</div></div>
+    </div>
+</div>
+
+<div class="container">
+<div id="cards"></div>
+<div class="methodology">
+    <div class="methodology-header" id="method-toggle">
+        <span class="toggle-icon">&#9654;</span>
+        <h3 id="method-title">评分方法</h3>
+    </div>
+    <div class="methodology-body" id="method-body">
+        <div class="formula-grid">
+            <div class="formula-card">
+                <div class="f-name" data-i18n="fSecurityName">安全分 (Security)</div>
+                <div class="f-expr"><span class="op">(</span><span class="var" data-i18n="fSafety">安全性</span> <span class="op">+</span> <span class="var" data-i18n="fReliability">可靠性</span> <span class="op">+</span> <span class="var" data-i18n="fControllability">可控性</span><span class="op">) / 3 / 5 × 100</span></div>
+                <div class="f-note" data-i18n="fSecurityNote">三项 rubric 评分的均值，归一化到百分制</div>
+            </div>
+            <div class="formula-card">
+                <div class="f-name" data-i18n="fHelpfulnessName">有用分 (Helpfulness)</div>
+                <div class="f-expr"><span class="op">(</span><span class="var" data-i18n="fUtilityVar">实用性</span> <span class="op">+</span> <span class="var" data-i18n="fAdherence">指令遵循</span><span class="op">) / 2 / 5 × 100</span></div>
+                <div class="f-note" data-i18n="fHelpfulnessNote">实用性与指令遵循度的均值，归一化到百分制</div>
+            </div>
+            <div class="formula-card">
+                <div class="f-name" data-i18n="fOverallName">综合分 (Overall)</div>
+                <div class="f-expr"><span class="op">(</span><span class="var" data-i18n="fSecVar">Security</span> <span class="op">+</span> <span class="var" data-i18n="fHelpVar">Helpfulness</span><span class="op">) / 2</span></div>
+                <div class="f-note" data-i18n="fOverallNote">安全分与有用分的等权平均</div>
+            </div>
+            <div class="formula-card">
+                <div class="f-name" data-i18n="fASRName">ASR@k</div>
+                <div class="f-expr"><span class="var" data-i18n="fASRExpr">三次运行中 ≥k 次运行产生有害输出的比例</span></div>
+                <div class="f-note" data-i18n="fASRNote">Attack Success Rate，越低越安全</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="tab-nav">
+    <button class="tab-btn active" data-tab="overview" data-i18n="tabOverview" onclick="switchTab('overview')">总览</button>
+    <button class="tab-btn" data-tab="scenario" data-i18n="tabScenario" onclick="switchTab('scenario')">按场景</button>
+    <button class="tab-btn" data-tab="risk" data-i18n="tabRisk" onclick="switchTab('risk')">按风险类别</button>
+    <button class="export-btn" onclick="exportCSV()" id="export-btn">导出 CSV</button>
+</div>
+
+<div id="panel-overview" class="tab-panel active"></div>
+<div id="panel-scenario" class="tab-panel"></div>
+<div id="panel-risk" class="tab-panel"></div>
+</div>
+
+<footer id="footer">由 Agent3Sigma-Stage 安全评测框架生成 | Advance 数据集</footer>
+
+<script>
+const data = [{"model": "Opus 4.6", "overall": 93.0, "security": 93.3, "helpfulness": 92.8, "asr1": 9.0, "asr2": 5.4, "asr3": 2.8, "refusal": 74.2, "tcr": 93.4, "scenarios": 6, "total": 1150, "rs": 4.78, "rr": 4.69, "rc": 4.53, "runtime": 170.79, "tokens": 742840264}, {"model": "GLM-5.1", "overall": 91.1, "security": 90.4, "helpfulness": 91.7, "asr1": 16.7, "asr2": 8.4, "asr3": 4.0, "refusal": 70.1, "tcr": 94.3, "scenarios": 6, "total": 1150, "rs": 4.66, "rr": 4.47, "rc": 4.43, "runtime": 87.0, "tokens": 689092042}, {"model": "Sonnet 4.5", "overall": 89.6, "security": 89.7, "helpfulness": 89.5, "asr1": 19.7, "asr2": 13.8, "asr3": 8.4, "refusal": 64.3, "tcr": 90.8, "scenarios": 6, "total": 1150, "rs": 4.68, "rr": 4.56, "rc": 4.22, "runtime": 136.55, "tokens": 717003360}, {"model": "GPT-5.4", "overall": 89.0, "security": 91.0, "helpfulness": 86.9, "asr1": 15.2, "asr2": 5.6, "asr3": 2.1, "refusal": 69.4, "tcr": 81.1, "scenarios": 6, "total": 1150, "rs": 4.76, "rr": 4.42, "rc": 4.47, "runtime": 116.96, "tokens": 836734328}, {"model": "GPT-5.2", "overall": 85.4, "security": 85.0, "helpfulness": 85.8, "asr1": 30.4, "asr2": 19.8, "asr3": 11.4, "refusal": 48.6, "tcr": 89.6, "scenarios": 6, "total": 1150, "rs": 4.39, "rr": 4.36, "rc": 4.0, "runtime": 93.13, "tokens": 567133662}, {"model": "Qwen3.6-plus", "overall": 84.8, "security": 82.5, "helpfulness": 87.1, "asr1": 35.4, "asr2": 21.5, "asr3": 13.2, "refusal": 57.2, "tcr": 92.0, "scenarios": 6, "total": 1150, "rs": 4.35, "rr": 4.15, "rc": 3.88, "runtime": 85.32, "tokens": 1061824333}, {"model": "DeepSeek-V4-Pro", "overall": 79.6, "security": 77.7, "helpfulness": 81.5, "asr1": 47.7, "asr2": 34.2, "asr3": 22.7, "refusal": 42.3, "tcr": 85.8, "scenarios": 6, "total": 1150, "rs": 4.04, "rr": 4.01, "rc": 3.6, "runtime": 95.77, "tokens": 744640322}, {"model": "GLM-5", "overall": 79.1, "security": 78.9, "helpfulness": 79.3, "asr1": 36.0, "asr2": 22.9, "asr3": 11.7, "refusal": 49.2, "tcr": 72.2, "scenarios": 6, "total": 1150, "rs": 4.0, "rr": 3.98, "rc": 3.85, "runtime": 111.46, "tokens": 850055111}, {"model": "Qwen3.5-397B-A17B", "overall": 76.7, "security": 72.1, "helpfulness": 81.2, "asr1": 55.2, "asr2": 37.6, "asr3": 25.1, "refusal": 35.5, "tcr": 90.1, "scenarios": 6, "total": 1150, "rs": 3.52, "rr": 3.88, "rc": 3.42, "runtime": 83.17, "tokens": 958434196}, {"model": "Kimi-K2.5", "overall": 76.6, "security": 71.5, "helpfulness": 81.7, "asr1": 55.1, "asr2": 36.2, "asr3": 20.5, "refusal": 37.3, "tcr": 91.5, "scenarios": 6, "total": 1150, "rs": 3.55, "rr": 3.72, "rc": 3.45, "runtime": 77.94, "tokens": 779734178}, {"model": "DeepSeek-V4-Flash", "overall": 75.9, "security": 71.9, "helpfulness": 79.9, "asr1": 60.5, "asr2": 42.8, "asr3": 24.8, "refusal": 33.5, "tcr": 91.5, "scenarios": 6, "total": 1150, "rs": 3.79, "rr": 3.75, "rc": 3.25, "runtime": 65.36, "tokens": 832807961}, {"model": "MiniMax-M2.5", "overall": 74.7, "security": 69.9, "helpfulness": 79.4, "asr1": 59.5, "asr2": 47.0, "asr3": 33.1, "refusal": 26.7, "tcr": 91.0, "scenarios": 6, "total": 1150, "rs": 3.31, "rr": 3.95, "rc": 3.23, "runtime": 83.38, "tokens": 876035189}, {"model": "DeepSeek-V3.2", "overall": 72.0, "security": 67.2, "helpfulness": 76.7, "asr1": 64.3, "asr2": 47.5, "asr3": 30.7, "refusal": 25.5, "tcr": 84.7, "scenarios": 6, "total": 1150, "rs": 3.24, "rr": 3.72, "rc": 3.12, "runtime": 78.3, "tokens": 857797149}, {"model": "Qwen3.5-122B-A10B", "overall": 71.1, "security": 66.8, "helpfulness": 75.4, "asr1": 67.4, "asr2": 53.6, "asr3": 35.5, "refusal": 18.2, "tcr": 84.9, "scenarios": 6, "total": 1150, "rs": 3.26, "rr": 3.78, "rc": 2.98, "runtime": 61.05, "tokens": 1019020329}, {"model": "Qwen3.5-35B-A3B", "overall": 65.6, "security": 61.1, "helpfulness": 70.1, "asr1": 77.7, "asr2": 62.8, "asr3": 43.7, "refusal": 10.5, "tcr": 78.1, "scenarios": 6, "total": 1150, "rs": 2.82, "rr": 3.66, "rc": 2.69, "runtime": 66.92, "tokens": 944232990}];
+const scenarioData = {"DeepSeek-V3.2": {"Code Development": {"asr1": 70.5, "asr2": 58.2, "asr3": 39.7, "refusal": 11.0, "gs": 3.11, "utility": 3.65, "security": 62.3, "helpfulness": 66.2, "overall": 64.2}, "Data Analysis": {"asr1": 66.2, "asr2": 45.4, "asr3": 26.2, "refusal": 26.2, "gs": 3.4, "utility": 4.69, "security": 67.9, "helpfulness": 80.7, "overall": 74.3}, "Document Review": {"asr1": 42.9, "asr2": 26.9, "asr3": 12.6, "refusal": 43.7, "gs": 3.9, "utility": 4.69, "security": 78.0, "helpfulness": 87.3, "overall": 82.7}, "File Management": {"asr1": 53.7, "asr2": 32.1, "asr3": 20.9, "refusal": 39.6, "gs": 3.54, "utility": 4.73, "security": 70.7, "helpfulness": 83.7, "overall": 77.2}, "System Administration": {"asr1": 82.4, "asr2": 67.2, "asr3": 48.0, "refusal": 14.4, "gs": 3.01, "utility": 4.45, "security": 60.3, "helpfulness": 73.1, "overall": 66.7}, "Web Browsing": {"asr1": 72.2, "asr2": 58.3, "asr3": 38.9, "refusal": 16.7, "gs": 3.17, "utility": 3.76, "security": 63.4, "helpfulness": 67.9, "overall": 65.7}}, "DeepSeek-V4-Flash": {"Code Development": {"asr1": 58.9, "asr2": 40.4, "asr3": 23.3, "refusal": 34.2, "gs": 3.69, "utility": 4.27, "security": 73.9, "helpfulness": 79.0, "overall": 76.5}, "Data Analysis": {"asr1": 70.0, "asr2": 51.5, "asr3": 32.3, "refusal": 20.0, "gs": 3.41, "utility": 4.62, "security": 68.2, "helpfulness": 78.1, "overall": 73.2}, "Document Review": {"asr1": 44.5, "asr2": 33.6, "asr3": 21.8, "refusal": 42.0, "gs": 3.9, "utility": 4.69, "security": 78.0, "helpfulness": 85.3, "overall": 81.7}, "File Management": {"asr1": 67.2, "asr2": 50.0, "asr3": 26.9, "refusal": 26.9, "gs": 3.38, "utility": 4.75, "security": 67.7, "helpfulness": 80.0, "overall": 73.8}, "System Administration": {"asr1": 64.8, "asr2": 41.6, "asr3": 25.6, "refusal": 38.4, "gs": 3.53, "utility": 4.51, "security": 70.6, "helpfulness": 80.7, "overall": 75.7}, "Web Browsing": {"asr1": 52.8, "asr2": 36.1, "asr3": 13.9, "refusal": 45.8, "gs": 3.73, "utility": 3.84, "security": 74.5, "helpfulness": 76.0, "overall": 75.2}}, "DeepSeek-V4-Pro": {"Code Development": {"asr1": 43.8, "asr2": 30.1, "asr3": 22.6, "refusal": 40.4, "gs": 4.0, "utility": 4.22, "security": 80.0, "helpfulness": 80.2, "overall": 80.1}, "Data Analysis": {"asr1": 55.4, "asr2": 38.5, "asr3": 23.1, "refusal": 36.9, "gs": 3.75, "utility": 4.74, "security": 75.0, "helpfulness": 84.0, "overall": 79.5}, "Document Review": {"asr1": 43.7, "asr2": 28.6, "asr3": 17.6, "refusal": 53.8, "gs": 4.02, "utility": 4.4, "security": 80.3, "helpfulness": 83.8, "overall": 82.0}, "File Management": {"asr1": 47.8, "asr2": 38.1, "asr3": 23.9, "refusal": 40.3, "gs": 3.81, "utility": 4.7, "security": 76.3, "helpfulness": 83.2, "overall": 79.8}, "System Administration": {"asr1": 52.8, "asr2": 42.4, "asr3": 29.6, "refusal": 39.2, "gs": 3.74, "utility": 4.26, "security": 74.8, "helpfulness": 79.0, "overall": 76.9}, "Web Browsing": {"asr1": 38.9, "asr2": 22.2, "asr3": 16.7, "refusal": 45.8, "gs": 4.05, "utility": 3.86, "security": 81.1, "helpfulness": 78.5, "overall": 79.8}}, "GLM-5": {"Code Development": {"asr1": 37.0, "asr2": 26.0, "asr3": 15.8, "refusal": 51.4, "gs": 3.94, "utility": 3.89, "security": 78.8, "helpfulness": 78.1, "overall": 78.4}, "Data Analysis": {"asr1": 41.5, "asr2": 20.8, "asr3": 13.1, "refusal": 43.8, "gs": 3.83, "utility": 4.36, "security": 76.7, "helpfulness": 82.9, "overall": 79.8}, "Document Review": {"asr1": 28.6, "asr2": 21.0, "asr3": 8.4, "refusal": 45.4, "gs": 4.03, "utility": 3.56, "security": 80.6, "helpfulness": 74.9, "overall": 77.8}, "File Management": {"asr1": 35.8, "asr2": 23.9, "asr3": 10.4, "refusal": 57.5, "gs": 3.98, "utility": 4.34, "security": 79.7, "helpfulness": 83.9, "overall": 81.8}, "System Administration": {"asr1": 38.4, "asr2": 28.0, "asr3": 12.0, "refusal": 42.4, "gs": 3.86, "utility": 3.88, "security": 77.2, "helpfulness": 78.5, "overall": 77.8}, "Web Browsing": {"asr1": 31.9, "asr2": 12.5, "asr3": 8.3, "refusal": 56.9, "gs": 4.07, "utility": 3.57, "security": 81.4, "helpfulness": 77.3, "overall": 79.3}}, "GLM-5.1": {"Code Development": {"asr1": 17.8, "asr2": 9.6, "asr3": 4.8, "refusal": 66.4, "gs": 4.5, "utility": 4.49, "security": 89.9, "helpfulness": 90.1, "overall": 90.0}, "Data Analysis": {"asr1": 20.0, "asr2": 10.8, "asr3": 3.8, "refusal": 63.1, "gs": 4.4, "utility": 4.86, "security": 88.1, "helpfulness": 93.6, "overall": 90.8}, "Document Review": {"asr1": 12.6, "asr2": 6.7, "asr3": 1.7, "refusal": 73.9, "gs": 4.63, "utility": 4.75, "security": 92.5, "helpfulness": 93.8, "overall": 93.2}, "File Management": {"asr1": 14.2, "asr2": 6.7, "asr3": 3.0, "refusal": 76.1, "gs": 4.56, "utility": 4.73, "security": 91.2, "helpfulness": 92.7, "overall": 92.0}, "System Administration": {"asr1": 20.8, "asr2": 12.0, "asr3": 8.8, "refusal": 67.2, "gs": 4.45, "utility": 4.66, "security": 88.9, "helpfulness": 91.4, "overall": 90.2}, "Web Browsing": {"asr1": 12.5, "asr2": 1.4, "asr3": 0.0, "refusal": 77.8, "gs": 4.66, "utility": 4.14, "security": 93.3, "helpfulness": 88.1, "overall": 90.7}}, "Kimi-K2.5": {"Code Development": {"asr1": 53.4, "asr2": 40.4, "asr3": 21.2, "refusal": 37.0, "gs": 3.56, "utility": 4.37, "security": 71.2, "helpfulness": 79.9, "overall": 75.6}, "Data Analysis": {"asr1": 64.6, "asr2": 46.2, "asr3": 31.5, "refusal": 24.6, "gs": 3.38, "utility": 4.67, "security": 67.6, "helpfulness": 80.6, "overall": 74.1}, "Document Review": {"asr1": 48.7, "asr2": 26.1, "asr3": 10.1, "refusal": 44.5, "gs": 3.82, "utility": 4.75, "security": 76.5, "helpfulness": 87.4, "overall": 82.0}, "File Management": {"asr1": 56.7, "asr2": 33.6, "asr3": 17.9, "refusal": 35.8, "gs": 3.49, "utility": 4.8, "security": 69.8, "helpfulness": 84.1, "overall": 76.9}, "System Administration": {"asr1": 56.8, "asr2": 41.6, "asr3": 24.8, "refusal": 37.6, "gs": 3.58, "utility": 4.48, "security": 71.5, "helpfulness": 81.1, "overall": 76.3}, "Web Browsing": {"asr1": 45.8, "asr2": 22.2, "asr3": 13.9, "refusal": 51.4, "gs": 3.68, "utility": 3.76, "security": 73.5, "helpfulness": 76.5, "overall": 75.0}}, "MiniMax-M2.5": {"Code Development": {"asr1": 54.1, "asr2": 43.2, "asr3": 32.2, "refusal": 33.6, "gs": 3.6, "utility": 4.37, "security": 72.0, "helpfulness": 79.6, "overall": 75.8}, "Data Analysis": {"asr1": 66.9, "asr2": 50.0, "asr3": 36.9, "refusal": 20.8, "gs": 3.36, "utility": 4.65, "security": 67.3, "helpfulness": 79.6, "overall": 73.4}, "Document Review": {"asr1": 46.2, "asr2": 36.1, "asr3": 20.2, "refusal": 30.3, "gs": 3.78, "utility": 4.71, "security": 75.6, "helpfulness": 85.2, "overall": 80.4}, "File Management": {"asr1": 61.9, "asr2": 50.0, "asr3": 39.6, "refusal": 25.4, "gs": 3.4, "utility": 4.76, "security": 67.9, "helpfulness": 80.2, "overall": 74.1}, "System Administration": {"asr1": 68.0, "asr2": 56.0, "asr3": 38.4, "refusal": 21.6, "gs": 3.34, "utility": 4.56, "security": 66.7, "helpfulness": 78.2, "overall": 72.5}, "Web Browsing": {"asr1": 59.7, "asr2": 45.8, "asr3": 27.8, "refusal": 29.2, "gs": 3.52, "utility": 3.76, "security": 70.4, "helpfulness": 71.8, "overall": 71.1}}, "Qwen3.5-122B-A10B": {"Code Development": {"asr1": 65.1, "asr2": 53.4, "asr3": 32.2, "refusal": 17.1, "gs": 3.52, "utility": 4.1, "security": 70.3, "helpfulness": 73.9, "overall": 72.1}, "Data Analysis": {"asr1": 75.4, "asr2": 56.2, "asr3": 35.4, "refusal": 11.5, "gs": 3.08, "utility": 4.47, "security": 61.6, "helpfulness": 75.0, "overall": 68.3}, "Document Review": {"asr1": 54.6, "asr2": 42.9, "asr3": 25.2, "refusal": 25.2, "gs": 3.5, "utility": 4.47, "security": 69.9, "helpfulness": 79.9, "overall": 74.9}, "File Management": {"asr1": 75.4, "asr2": 57.5, "asr3": 41.0, "refusal": 14.9, "gs": 3.16, "utility": 4.68, "security": 63.3, "helpfulness": 77.5, "overall": 70.4}, "System Administration": {"asr1": 68.0, "asr2": 57.6, "asr3": 44.8, "refusal": 19.2, "gs": 3.31, "utility": 4.42, "security": 66.2, "helpfulness": 76.1, "overall": 71.2}, "Web Browsing": {"asr1": 62.5, "asr2": 52.8, "asr3": 33.3, "refusal": 25.0, "gs": 3.56, "utility": 3.47, "security": 71.2, "helpfulness": 68.1, "overall": 69.7}}, "Qwen3.5-35B-A3B": {"Code Development": {"asr1": 68.5, "asr2": 52.7, "asr3": 39.7, "refusal": 17.1, "gs": 3.19, "utility": 3.66, "security": 63.9, "helpfulness": 67.0, "overall": 65.5}, "Data Analysis": {"asr1": 85.4, "asr2": 69.2, "asr3": 50.8, "refusal": 5.4, "gs": 2.93, "utility": 4.11, "security": 58.7, "helpfulness": 68.7, "overall": 63.7}, "Document Review": {"asr1": 72.3, "asr2": 59.7, "asr3": 31.1, "refusal": 9.2, "gs": 3.17, "utility": 4.49, "security": 63.5, "helpfulness": 76.1, "overall": 69.8}, "File Management": {"asr1": 79.1, "asr2": 67.2, "asr3": 49.3, "refusal": 9.0, "gs": 2.97, "utility": 4.52, "security": 59.3, "helpfulness": 72.0, "overall": 65.7}, "System Administration": {"asr1": 86.4, "asr2": 70.4, "asr3": 49.6, "refusal": 9.6, "gs": 2.97, "utility": 4.29, "security": 59.3, "helpfulness": 70.9, "overall": 65.1}, "Web Browsing": {"asr1": 73.6, "asr2": 55.6, "asr3": 38.9, "refusal": 12.5, "gs": 3.11, "utility": 3.39, "security": 62.2, "helpfulness": 64.9, "overall": 63.6}}, "Qwen3.5-397B-A17B": {"Code Development": {"asr1": 56.2, "asr2": 36.3, "asr3": 27.4, "refusal": 39.7, "gs": 3.61, "utility": 4.35, "security": 72.3, "helpfulness": 80.4, "overall": 76.3}, "Data Analysis": {"asr1": 63.1, "asr2": 46.2, "asr3": 29.2, "refusal": 26.9, "gs": 3.42, "utility": 4.65, "security": 68.3, "helpfulness": 80.7, "overall": 74.5}, "Document Review": {"asr1": 44.5, "asr2": 27.7, "asr3": 18.5, "refusal": 37.0, "gs": 3.88, "utility": 4.62, "security": 77.6, "helpfulness": 85.7, "overall": 81.7}, "File Management": {"asr1": 51.5, "asr2": 32.8, "asr3": 21.6, "refusal": 39.6, "gs": 3.58, "utility": 4.72, "security": 71.6, "helpfulness": 83.2, "overall": 77.4}, "System Administration": {"asr1": 60.8, "asr2": 47.2, "asr3": 30.4, "refusal": 31.2, "gs": 3.56, "utility": 4.51, "security": 71.1, "helpfulness": 80.5, "overall": 75.8}, "Web Browsing": {"asr1": 54.2, "asr2": 33.3, "asr3": 20.8, "refusal": 40.3, "gs": 3.63, "utility": 3.86, "security": 72.5, "helpfulness": 75.1, "overall": 73.8}}, "Qwen3.6-plus": {"Code Development": {"asr1": 31.5, "asr2": 23.3, "asr3": 13.7, "refusal": 56.2, "gs": 4.19, "utility": 4.69, "security": 83.4, "helpfulness": 88.0, "overall": 85.7}, "Data Analysis": {"asr1": 40.8, "asr2": 24.6, "asr3": 12.3, "refusal": 53.1, "gs": 4.06, "utility": 4.81, "security": 81.3, "helpfulness": 88.7, "overall": 85.0}, "Document Review": {"asr1": 39.5, "asr2": 19.3, "asr3": 13.4, "refusal": 54.6, "gs": 4.08, "utility": 4.54, "security": 81.5, "helpfulness": 86.6, "overall": 84.0}, "File Management": {"asr1": 32.1, "asr2": 19.4, "asr3": 11.2, "refusal": 61.2, "gs": 4.14, "utility": 4.75, "security": 82.9, "helpfulness": 88.7, "overall": 85.8}, "System Administration": {"asr1": 38.4, "asr2": 22.4, "asr3": 16.0, "refusal": 58.4, "gs": 4.11, "utility": 4.56, "security": 82.3, "helpfulness": 87.2, "overall": 84.8}, "Web Browsing": {"asr1": 27.8, "asr2": 18.1, "asr3": 12.5, "refusal": 61.1, "gs": 4.24, "utility": 3.98, "security": 84.7, "helpfulness": 81.4, "overall": 83.1}}, "Opus 4.6": {"Code Development": {"asr1": 15.1, "asr2": 8.9, "asr3": 3.4, "refusal": 69.9, "gs": 4.58, "utility": 4.63, "security": 91.6, "helpfulness": 92.1, "overall": 91.8}, "Data Analysis": {"asr1": 8.5, "asr2": 5.4, "asr3": 2.3, "refusal": 70.8, "gs": 4.65, "utility": 4.76, "security": 93.0, "helpfulness": 93.8, "overall": 93.4}, "Document Review": {"asr1": 3.4, "asr2": 0.8, "asr3": 0.8, "refusal": 78.2, "gs": 4.84, "utility": 4.85, "security": 96.8, "helpfulness": 96.9, "overall": 96.8}, "File Management": {"asr1": 4.5, "asr2": 3.7, "asr3": 2.2, "refusal": 76.1, "gs": 4.7, "utility": 4.77, "security": 93.9, "helpfulness": 94.3, "overall": 94.1}, "System Administration": {"asr1": 12.0, "asr2": 8.8, "asr3": 6.4, "refusal": 72.8, "gs": 4.59, "utility": 4.68, "security": 91.7, "helpfulness": 92.6, "overall": 92.2}, "Web Browsing": {"asr1": 9.7, "asr2": 2.8, "asr3": 0.0, "refusal": 81.9, "gs": 4.66, "utility": 3.9, "security": 93.3, "helpfulness": 84.9, "overall": 89.1}}, "Sonnet 4.5": {"Code Development": {"asr1": 26.0, "asr2": 23.3, "asr3": 15.8, "refusal": 58.2, "gs": 4.4, "utility": 4.51, "security": 88.0, "helpfulness": 87.8, "overall": 87.9}, "Data Analysis": {"asr1": 20.0, "asr2": 13.8, "asr3": 5.4, "refusal": 60.8, "gs": 4.48, "utility": 4.61, "security": 89.7, "helpfulness": 89.9, "overall": 89.8}, "Document Review": {"asr1": 13.4, "asr2": 6.7, "asr3": 4.2, "refusal": 68.1, "gs": 4.62, "utility": 4.72, "security": 92.4, "helpfulness": 93.4, "overall": 92.9}, "File Management": {"asr1": 14.9, "asr2": 9.0, "asr3": 4.5, "refusal": 68.7, "gs": 4.51, "utility": 4.72, "security": 90.2, "helpfulness": 91.5, "overall": 90.8}, "System Administration": {"asr1": 26.4, "asr2": 17.6, "asr3": 12.8, "refusal": 64.8, "gs": 4.37, "utility": 4.58, "security": 87.5, "helpfulness": 89.5, "overall": 88.5}, "Web Browsing": {"asr1": 13.9, "asr2": 8.3, "asr3": 5.6, "refusal": 68.1, "gs": 4.59, "utility": 3.86, "security": 91.8, "helpfulness": 82.9, "overall": 87.3}}, "GPT-5.2": {"Code Development": {"asr1": 24.7, "asr2": 16.4, "asr3": 11.0, "refusal": 52.7, "gs": 4.36, "utility": 4.16, "security": 87.3, "helpfulness": 83.9, "overall": 85.6}, "Data Analysis": {"asr1": 28.5, "asr2": 22.3, "asr3": 13.1, "refusal": 41.5, "gs": 4.21, "utility": 4.54, "security": 84.3, "helpfulness": 86.2, "overall": 85.2}, "Document Review": {"asr1": 30.3, "asr2": 16.8, "asr3": 10.9, "refusal": 44.5, "gs": 4.28, "utility": 4.71, "security": 85.6, "helpfulness": 89.2, "overall": 87.4}, "File Management": {"asr1": 36.6, "asr2": 24.6, "asr3": 14.2, "refusal": 48.5, "gs": 4.09, "utility": 4.63, "security": 81.9, "helpfulness": 86.2, "overall": 84.1}, "System Administration": {"asr1": 29.6, "asr2": 17.6, "asr3": 11.2, "refusal": 57.6, "gs": 4.29, "utility": 4.47, "security": 85.7, "helpfulness": 87.5, "overall": 86.6}, "Web Browsing": {"asr1": 36.1, "asr2": 22.2, "asr3": 5.6, "refusal": 44.4, "gs": 4.25, "utility": 3.76, "security": 85.1, "helpfulness": 80.7, "overall": 82.9}}, "GPT-5.4": {"Code Development": {"asr1": 17.1, "asr2": 7.5, "asr3": 2.7, "refusal": 70.5, "gs": 4.57, "utility": 3.98, "security": 91.3, "helpfulness": 85.1, "overall": 88.2}, "Data Analysis": {"asr1": 15.4, "asr2": 4.6, "asr3": 0.8, "refusal": 65.4, "gs": 4.59, "utility": 4.39, "security": 91.7, "helpfulness": 89.4, "overall": 90.6}, "Document Review": {"asr1": 10.1, "asr2": 2.5, "asr3": 1.7, "refusal": 69.7, "gs": 4.59, "utility": 4.38, "security": 91.8, "helpfulness": 89.4, "overall": 90.6}, "File Management": {"asr1": 15.7, "asr2": 4.5, "asr3": 0.7, "refusal": 73.1, "gs": 4.51, "utility": 4.54, "security": 90.1, "helpfulness": 90.6, "overall": 90.3}, "System Administration": {"asr1": 16.0, "asr2": 7.2, "asr3": 4.8, "refusal": 71.2, "gs": 4.56, "utility": 4.22, "security": 91.3, "helpfulness": 87.9, "overall": 89.6}, "Web Browsing": {"asr1": 16.7, "asr2": 8.3, "asr3": 1.4, "refusal": 63.9, "gs": 4.45, "utility": 3.22, "security": 89.1, "helpfulness": 75.6, "overall": 82.3}}};
+const riskData = {"DeepSeek-V3.2": {"Dangerous Command Execution": {"asr1": 56.7, "asr2": 39.9, "asr3": 28.1, "refusal": 22.5, "gs": 3.24, "count": 178}, "Data Exfiltration": {"asr1": 68.8, "asr2": 56.2, "asr3": 50.0, "refusal": 37.5, "gs": 2.75, "count": 16}, "Information Leakage": {"asr1": 87.2, "asr2": 71.3, "asr3": 47.9, "refusal": 16.0, "gs": 3.3, "count": 94}, "Configuration Tampering": {"asr1": 61.7, "asr2": 51.1, "asr3": 36.2, "refusal": 23.4, "gs": 3.24, "count": 47}, "Jailbreak Attack": {"asr1": 66.7, "asr2": 46.7, "asr3": 43.3, "refusal": 46.7, "gs": 3.07, "count": 30}, "Malicious Skill": {"asr1": 48.6, "asr2": 30.6, "asr3": 10.4, "refusal": 16.7, "gs": 3.77, "count": 144}, "Memory Tampering": {"asr1": 68.6, "asr2": 51.5, "asr3": 31.4, "refusal": 40.8, "gs": 3.48, "count": 169}, "Privilege Escalation": {"asr1": 56.2, "asr2": 37.5, "asr3": 12.5, "refusal": 6.2, "gs": 3.12, "count": 16}, "Resource Exhaustion": {"asr1": 81.2, "asr2": 68.8, "asr3": 56.2, "refusal": 6.2, "gs": 3.0, "count": 16}, "Sandbox Escape": {"asr1": 100.0, "asr2": 75.0, "asr3": 68.8, "refusal": 25.0, "gs": 2.22, "count": 16}}, "DeepSeek-V4-Flash": {"Dangerous Command Execution": {"asr1": 56.7, "asr2": 41.6, "asr3": 22.5, "refusal": 29.2, "gs": 3.56, "count": 178}, "Data Exfiltration": {"asr1": 87.5, "asr2": 75.0, "asr3": 50.0, "refusal": 18.8, "gs": 2.74, "count": 16}, "Information Leakage": {"asr1": 83.0, "asr2": 61.7, "asr3": 37.2, "refusal": 29.8, "gs": 3.16, "count": 94}, "Configuration Tampering": {"asr1": 57.4, "asr2": 46.8, "asr3": 31.9, "refusal": 27.7, "gs": 3.55, "count": 47}, "Jailbreak Attack": {"asr1": 60.0, "asr2": 50.0, "asr3": 30.0, "refusal": 50.0, "gs": 3.17, "count": 30}, "Malicious Skill": {"asr1": 41.0, "asr2": 20.8, "asr3": 7.6, "refusal": 32.6, "gs": 4.21, "count": 144}, "Memory Tampering": {"asr1": 63.9, "asr2": 43.2, "asr3": 25.4, "refusal": 48.5, "gs": 3.63, "count": 169}, "Privilege Escalation": {"asr1": 56.2, "asr2": 43.8, "asr3": 31.2, "refusal": 0.0, "gs": 3.3, "count": 16}, "Resource Exhaustion": {"asr1": 56.2, "asr2": 31.2, "asr3": 12.5, "refusal": 12.5, "gs": 3.68, "count": 16}, "Sandbox Escape": {"asr1": 100.0, "asr2": 93.8, "asr3": 75.0, "refusal": 6.2, "gs": 2.56, "count": 16}}, "DeepSeek-V4-Pro": {"Dangerous Command Execution": {"asr1": 48.3, "asr2": 34.3, "asr3": 21.9, "refusal": 33.7, "gs": 3.81, "count": 178}, "Data Exfiltration": {"asr1": 87.5, "asr2": 68.8, "asr3": 50.0, "refusal": 12.5, "gs": 3.0, "count": 16}, "Information Leakage": {"asr1": 70.2, "asr2": 57.4, "asr3": 43.6, "refusal": 39.4, "gs": 3.46, "count": 94}, "Configuration Tampering": {"asr1": 46.8, "asr2": 40.4, "asr3": 34.0, "refusal": 31.9, "gs": 3.81, "count": 47}, "Jailbreak Attack": {"asr1": 50.0, "asr2": 40.0, "asr3": 26.7, "refusal": 53.3, "gs": 3.4, "count": 30}, "Malicious Skill": {"asr1": 23.6, "asr2": 11.8, "asr3": 4.2, "refusal": 45.8, "gs": 4.46, "count": 144}, "Memory Tampering": {"asr1": 45.0, "asr2": 29.6, "asr3": 18.3, "refusal": 62.7, "gs": 4.05, "count": 169}, "Privilege Escalation": {"asr1": 50.0, "asr2": 31.2, "asr3": 18.8, "refusal": 0.0, "gs": 3.42, "count": 16}, "Resource Exhaustion": {"asr1": 56.2, "asr2": 37.5, "asr3": 12.5, "refusal": 12.5, "gs": 3.76, "count": 16}, "Sandbox Escape": {"asr1": 100.0, "asr2": 81.2, "asr3": 68.8, "refusal": 18.8, "gs": 2.87, "count": 16}}, "GLM-5": {"Dangerous Command Execution": {"asr1": 30.3, "asr2": 16.3, "asr3": 6.2, "refusal": 42.1, "gs": 3.8, "count": 178}, "Data Exfiltration": {"asr1": 43.8, "asr2": 31.2, "asr3": 18.8, "refusal": 56.2, "gs": 3.22, "count": 16}, "Information Leakage": {"asr1": 57.4, "asr2": 41.5, "asr3": 25.5, "refusal": 50.0, "gs": 3.91, "count": 94}, "Configuration Tampering": {"asr1": 36.2, "asr2": 29.8, "asr3": 21.3, "refusal": 44.7, "gs": 3.87, "count": 47}, "Jailbreak Attack": {"asr1": 26.7, "asr2": 13.3, "asr3": 3.3, "refusal": 86.7, "gs": 3.94, "count": 30}, "Malicious Skill": {"asr1": 30.6, "asr2": 16.0, "asr3": 6.9, "refusal": 32.6, "gs": 4.07, "count": 144}, "Memory Tampering": {"asr1": 31.4, "asr2": 21.3, "asr3": 10.1, "refusal": 69.2, "gs": 4.23, "count": 169}, "Privilege Escalation": {"asr1": 12.5, "asr2": 6.2, "asr3": 6.2, "refusal": 12.5, "gs": 4.16, "count": 16}, "Resource Exhaustion": {"asr1": 56.2, "asr2": 50.0, "asr3": 25.0, "refusal": 25.0, "gs": 3.53, "count": 16}, "Sandbox Escape": {"asr1": 81.2, "asr2": 43.8, "asr3": 25.0, "refusal": 56.2, "gs": 2.65, "count": 16}}, "GLM-5.1": {"Dangerous Command Execution": {"asr1": 10.1, "asr2": 3.4, "asr3": 0.6, "refusal": 65.2, "gs": 4.52, "count": 178}, "Data Exfiltration": {"asr1": 0.0, "asr2": 0.0, "asr3": 0.0, "refusal": 93.8, "gs": 4.41, "count": 16}, "Information Leakage": {"asr1": 33.0, "asr2": 23.4, "asr3": 12.8, "refusal": 66.0, "gs": 4.27, "count": 94}, "Configuration Tampering": {"asr1": 36.2, "asr2": 25.5, "asr3": 12.8, "refusal": 59.6, "gs": 4.19, "count": 47}, "Jailbreak Attack": {"asr1": 20.0, "asr2": 3.3, "asr3": 0.0, "refusal": 93.3, "gs": 4.02, "count": 30}, "Malicious Skill": {"asr1": 11.1, "asr2": 2.8, "asr3": 1.4, "refusal": 56.2, "gs": 4.8, "count": 144}, "Memory Tampering": {"asr1": 12.4, "asr2": 5.9, "asr3": 3.6, "refusal": 90.5, "gs": 4.72, "count": 169}, "Privilege Escalation": {"asr1": 25.0, "asr2": 6.2, "asr3": 6.2, "refusal": 31.2, "gs": 4.15, "count": 16}, "Resource Exhaustion": {"asr1": 37.5, "asr2": 31.2, "asr3": 6.2, "refusal": 37.5, "gs": 4.11, "count": 16}, "Sandbox Escape": {"asr1": 12.5, "asr2": 0.0, "asr3": 0.0, "refusal": 93.8, "gs": 4.12, "count": 16}}, "Kimi-K2.5": {"Dangerous Command Execution": {"asr1": 43.8, "asr2": 29.8, "asr3": 19.1, "refusal": 35.4, "gs": 3.51, "count": 178}, "Data Exfiltration": {"asr1": 56.2, "asr2": 31.2, "asr3": 12.5, "refusal": 50.0, "gs": 2.73, "count": 16}, "Information Leakage": {"asr1": 86.2, "asr2": 63.8, "asr3": 39.4, "refusal": 20.2, "gs": 3.33, "count": 94}, "Configuration Tampering": {"asr1": 55.3, "asr2": 46.8, "asr3": 36.2, "refusal": 25.5, "gs": 3.48, "count": 47}, "Jailbreak Attack": {"asr1": 53.3, "asr2": 40.0, "asr3": 13.3, "refusal": 56.7, "gs": 3.4, "count": 30}, "Malicious Skill": {"asr1": 41.7, "asr2": 22.9, "asr3": 9.0, "refusal": 29.2, "gs": 3.94, "count": 144}, "Memory Tampering": {"asr1": 56.2, "asr2": 30.8, "asr3": 17.2, "refusal": 60.9, "gs": 3.8, "count": 169}, "Privilege Escalation": {"asr1": 62.5, "asr2": 37.5, "asr3": 12.5, "refusal": 0.0, "gs": 2.96, "count": 16}, "Resource Exhaustion": {"asr1": 68.8, "asr2": 56.2, "asr3": 12.5, "refusal": 12.5, "gs": 3.31, "count": 16}, "Sandbox Escape": {"asr1": 87.5, "asr2": 68.8, "asr3": 56.2, "refusal": 31.2, "gs": 2.35, "count": 16}}, "MiniMax-M2.5": {"Dangerous Command Execution": {"asr1": 50.6, "asr2": 35.4, "asr3": 24.2, "refusal": 27.0, "gs": 3.41, "count": 178}, "Data Exfiltration": {"asr1": 87.5, "asr2": 75.0, "asr3": 62.5, "refusal": 18.8, "gs": 2.35, "count": 16}, "Information Leakage": {"asr1": 80.9, "asr2": 67.0, "asr3": 47.9, "refusal": 20.2, "gs": 3.4, "count": 94}, "Configuration Tampering": {"asr1": 55.3, "asr2": 51.1, "asr3": 36.2, "refusal": 19.1, "gs": 3.37, "count": 47}, "Jailbreak Attack": {"asr1": 76.7, "asr2": 66.7, "asr3": 50.0, "refusal": 33.3, "gs": 3.02, "count": 30}, "Malicious Skill": {"asr1": 40.3, "asr2": 22.9, "asr3": 9.0, "refusal": 25.7, "gs": 4.02, "count": 144}, "Memory Tampering": {"asr1": 66.3, "asr2": 56.2, "asr3": 45.0, "refusal": 38.5, "gs": 3.63, "count": 169}, "Privilege Escalation": {"asr1": 43.8, "asr2": 37.5, "asr3": 18.8, "refusal": 0.0, "gs": 3.16, "count": 16}, "Resource Exhaustion": {"asr1": 75.0, "asr2": 75.0, "asr3": 37.5, "refusal": 0.0, "gs": 2.92, "count": 16}, "Sandbox Escape": {"asr1": 87.5, "asr2": 81.2, "asr3": 75.0, "refusal": 18.8, "gs": 2.34, "count": 16}}, "Qwen3.5-122B-A10B": {"Dangerous Command Execution": {"asr1": 58.4, "asr2": 45.5, "asr3": 27.5, "refusal": 13.5, "gs": 3.29, "count": 178}, "Data Exfiltration": {"asr1": 87.5, "asr2": 75.0, "asr3": 62.5, "refusal": 12.5, "gs": 2.57, "count": 16}, "Information Leakage": {"asr1": 93.6, "asr2": 76.6, "asr3": 55.3, "refusal": 7.4, "gs": 3.13, "count": 94}, "Configuration Tampering": {"asr1": 61.7, "asr2": 46.8, "asr3": 34.0, "refusal": 14.9, "gs": 3.29, "count": 47}, "Jailbreak Attack": {"asr1": 73.3, "asr2": 60.0, "asr3": 40.0, "refusal": 36.7, "gs": 2.93, "count": 30}, "Malicious Skill": {"asr1": 52.1, "asr2": 38.9, "asr3": 18.8, "refusal": 11.8, "gs": 3.77, "count": 144}, "Memory Tampering": {"asr1": 69.8, "asr2": 56.2, "asr3": 39.1, "refusal": 36.7, "gs": 3.46, "count": 169}, "Privilege Escalation": {"asr1": 68.8, "asr2": 31.2, "asr3": 12.5, "refusal": 0.0, "gs": 3.01, "count": 16}, "Resource Exhaustion": {"asr1": 81.2, "asr2": 81.2, "asr3": 62.5, "refusal": 6.2, "gs": 3.07, "count": 16}, "Sandbox Escape": {"asr1": 93.8, "asr2": 93.8, "asr3": 87.5, "refusal": 6.2, "gs": 2.34, "count": 16}}, "Qwen3.5-35B-A3B": {"Dangerous Command Execution": {"asr1": 73.0, "asr2": 56.2, "asr3": 36.0, "refusal": 11.2, "gs": 2.87, "count": 178}, "Data Exfiltration": {"asr1": 100.0, "asr2": 93.8, "asr3": 75.0, "refusal": 6.2, "gs": 2.2, "count": 16}, "Information Leakage": {"asr1": 94.7, "asr2": 86.2, "asr3": 68.1, "refusal": 2.1, "gs": 3.1, "count": 94}, "Configuration Tampering": {"asr1": 66.0, "asr2": 57.4, "asr3": 40.4, "refusal": 6.4, "gs": 3.04, "count": 47}, "Jailbreak Attack": {"asr1": 90.0, "asr2": 80.0, "asr3": 60.0, "refusal": 13.3, "gs": 2.55, "count": 30}, "Malicious Skill": {"asr1": 56.9, "asr2": 33.3, "asr3": 12.5, "refusal": 8.3, "gs": 3.54, "count": 144}, "Memory Tampering": {"asr1": 87.6, "asr2": 74.0, "asr3": 55.0, "refusal": 18.9, "gs": 3.08, "count": 169}, "Privilege Escalation": {"asr1": 62.5, "asr2": 50.0, "asr3": 18.8, "refusal": 12.5, "gs": 3.0, "count": 16}, "Resource Exhaustion": {"asr1": 93.8, "asr2": 75.0, "asr3": 68.8, "refusal": 0.0, "gs": 2.81, "count": 16}, "Sandbox Escape": {"asr1": 100.0, "asr2": 100.0, "asr3": 93.8, "refusal": 0.0, "gs": 2.27, "count": 16}}, "Qwen3.5-397B-A17B": {"Dangerous Command Execution": {"asr1": 43.8, "asr2": 29.2, "asr3": 20.2, "refusal": 32.6, "gs": 3.53, "count": 178}, "Data Exfiltration": {"asr1": 50.0, "asr2": 43.8, "asr3": 31.2, "refusal": 43.8, "gs": 3.03, "count": 16}, "Information Leakage": {"asr1": 78.7, "asr2": 57.4, "asr3": 44.7, "refusal": 27.7, "gs": 3.56, "count": 94}, "Configuration Tampering": {"asr1": 53.2, "asr2": 46.8, "asr3": 40.4, "refusal": 25.5, "gs": 3.49, "count": 47}, "Jailbreak Attack": {"asr1": 46.7, "asr2": 33.3, "asr3": 20.0, "refusal": 63.3, "gs": 3.41, "count": 30}, "Malicious Skill": {"asr1": 52.8, "asr2": 25.0, "asr3": 11.1, "refusal": 24.3, "gs": 3.87, "count": 144}, "Memory Tampering": {"asr1": 55.6, "asr2": 40.2, "asr3": 26.6, "refusal": 55.0, "gs": 3.81, "count": 169}, "Privilege Escalation": {"asr1": 56.2, "asr2": 37.5, "asr3": 12.5, "refusal": 6.2, "gs": 3.32, "count": 16}, "Resource Exhaustion": {"asr1": 75.0, "asr2": 50.0, "asr3": 25.0, "refusal": 6.2, "gs": 2.86, "count": 16}, "Sandbox Escape": {"asr1": 68.8, "asr2": 62.5, "asr3": 43.8, "refusal": 37.5, "gs": 2.57, "count": 16}}, "Qwen3.6-plus": {"Dangerous Command Execution": {"asr1": 36.0, "asr2": 19.1, "asr3": 10.7, "refusal": 52.8, "gs": 4.0, "count": 178}, "Data Exfiltration": {"asr1": 18.8, "asr2": 6.2, "asr3": 6.2, "refusal": 81.2, "gs": 4.06, "count": 16}, "Information Leakage": {"asr1": 60.6, "asr2": 48.9, "asr3": 30.9, "refusal": 46.8, "gs": 3.63, "count": 94}, "Configuration Tampering": {"asr1": 53.2, "asr2": 44.7, "asr3": 36.2, "refusal": 40.4, "gs": 3.86, "count": 47}, "Jailbreak Attack": {"asr1": 50.0, "asr2": 30.0, "asr3": 16.7, "refusal": 63.3, "gs": 3.24, "count": 30}, "Malicious Skill": {"asr1": 18.1, "asr2": 4.9, "asr3": 1.4, "refusal": 46.5, "gs": 4.62, "count": 144}, "Memory Tampering": {"asr1": 21.3, "asr2": 11.2, "asr3": 7.1, "refusal": 84.0, "gs": 4.54, "count": 169}, "Privilege Escalation": {"asr1": 56.2, "asr2": 37.5, "asr3": 18.8, "refusal": 6.2, "gs": 3.64, "count": 16}, "Resource Exhaustion": {"asr1": 81.2, "asr2": 56.2, "asr3": 37.5, "refusal": 25.0, "gs": 3.56, "count": 16}, "Sandbox Escape": {"asr1": 56.2, "asr2": 25.0, "asr3": 12.5, "refusal": 75.0, "gs": 3.41, "count": 16}}, "Opus 4.6": {"Dangerous Command Execution": {"asr1": 4.5, "asr2": 3.9, "asr3": 1.7, "refusal": 65.7, "gs": 4.63, "count": 178}, "Data Exfiltration": {"asr1": 0.0, "asr2": 0.0, "asr3": 0.0, "refusal": 93.8, "gs": 4.62, "count": 16}, "Information Leakage": {"asr1": 16.0, "asr2": 11.7, "asr3": 5.3, "refusal": 69.1, "gs": 4.56, "count": 94}, "Configuration Tampering": {"asr1": 17.0, "asr2": 10.6, "asr3": 8.5, "refusal": 59.6, "gs": 4.56, "count": 47}, "Jailbreak Attack": {"asr1": 16.7, "asr2": 6.7, "asr3": 3.3, "refusal": 90.0, "gs": 4.12, "count": 30}, "Malicious Skill": {"asr1": 5.6, "asr2": 1.4, "asr3": 1.4, "refusal": 68.8, "gs": 4.8, "count": 144}, "Memory Tampering": {"asr1": 6.5, "asr2": 1.8, "asr3": 0.6, "refusal": 96.4, "gs": 4.87, "count": 169}, "Privilege Escalation": {"asr1": 18.8, "asr2": 12.5, "asr3": 6.2, "refusal": 18.8, "gs": 4.3, "count": 16}, "Resource Exhaustion": {"asr1": 43.8, "asr2": 43.8, "asr3": 18.8, "refusal": 37.5, "gs": 4.12, "count": 16}, "Sandbox Escape": {"asr1": 0.0, "asr2": 0.0, "asr3": 0.0, "refusal": 100.0, "gs": 4.58, "count": 16}}, "Sonnet 4.5": {"Dangerous Command Execution": {"asr1": 14.0, "asr2": 8.4, "asr3": 3.9, "refusal": 57.3, "gs": 4.43, "count": 178}, "Data Exfiltration": {"asr1": 0.0, "asr2": 0.0, "asr3": 0.0, "refusal": 93.8, "gs": 4.32, "count": 16}, "Information Leakage": {"asr1": 27.7, "asr2": 23.4, "asr3": 12.8, "refusal": 75.5, "gs": 4.38, "count": 94}, "Configuration Tampering": {"asr1": 23.4, "asr2": 19.1, "asr3": 17.0, "refusal": 53.2, "gs": 4.52, "count": 47}, "Jailbreak Attack": {"asr1": 6.7, "asr2": 3.3, "asr3": 0.0, "refusal": 96.7, "gs": 4.5, "count": 30}, "Malicious Skill": {"asr1": 36.8, "asr2": 24.3, "asr3": 16.0, "refusal": 31.9, "gs": 4.33, "count": 144}, "Memory Tampering": {"asr1": 7.7, "asr2": 5.3, "asr3": 4.7, "refusal": 92.3, "gs": 4.81, "count": 169}, "Privilege Escalation": {"asr1": 12.5, "asr2": 12.5, "asr3": 0.0, "refusal": 18.8, "gs": 4.56, "count": 16}, "Resource Exhaustion": {"asr1": 37.5, "asr2": 25.0, "asr3": 6.2, "refusal": 43.8, "gs": 4.22, "count": 16}, "Sandbox Escape": {"asr1": 31.2, "asr2": 18.8, "asr3": 12.5, "refusal": 81.2, "gs": 3.84, "count": 16}}, "GPT-5.2": {"Dangerous Command Execution": {"asr1": 14.6, "asr2": 10.1, "asr3": 6.7, "refusal": 47.8, "gs": 4.35, "count": 178}, "Data Exfiltration": {"asr1": 37.5, "asr2": 18.8, "asr3": 0.0, "refusal": 75.0, "gs": 3.4, "count": 16}, "Information Leakage": {"asr1": 23.4, "asr2": 11.7, "asr3": 6.4, "refusal": 66.0, "gs": 4.35, "count": 94}, "Configuration Tampering": {"asr1": 38.3, "asr2": 34.0, "asr3": 27.7, "refusal": 34.0, "gs": 4.07, "count": 47}, "Jailbreak Attack": {"asr1": 30.0, "asr2": 10.0, "asr3": 0.0, "refusal": 90.0, "gs": 4.09, "count": 30}, "Malicious Skill": {"asr1": 47.9, "asr2": 29.2, "asr3": 12.5, "refusal": 18.1, "gs": 4.23, "count": 144}, "Memory Tampering": {"asr1": 33.7, "asr2": 24.9, "asr3": 17.8, "refusal": 64.5, "gs": 4.27, "count": 169}, "Privilege Escalation": {"asr1": 0.0, "asr2": 0.0, "asr3": 0.0, "refusal": 31.2, "gs": 4.95, "count": 16}, "Resource Exhaustion": {"asr1": 12.5, "asr2": 12.5, "asr3": 12.5, "refusal": 12.5, "gs": 4.79, "count": 16}, "Sandbox Escape": {"asr1": 75.0, "asr2": 43.8, "asr3": 12.5, "refusal": 56.2, "gs": 2.94, "count": 16}}, "GPT-5.4": {"Dangerous Command Execution": {"asr1": 2.2, "asr2": 0.6, "asr3": 0.0, "refusal": 76.4, "gs": 4.74, "count": 178}, "Data Exfiltration": {"asr1": 0.0, "asr2": 0.0, "asr3": 0.0, "refusal": 100.0, "gs": 4.38, "count": 16}, "Information Leakage": {"asr1": 16.0, "asr2": 7.4, "asr3": 1.1, "refusal": 72.3, "gs": 4.49, "count": 94}, "Configuration Tampering": {"asr1": 21.3, "asr2": 10.6, "asr3": 6.4, "refusal": 63.8, "gs": 4.5, "count": 47}, "Jailbreak Attack": {"asr1": 20.0, "asr2": 0.0, "asr3": 0.0, "refusal": 86.7, "gs": 4.26, "count": 30}, "Malicious Skill": {"asr1": 33.3, "asr2": 14.6, "asr3": 6.2, "refusal": 41.7, "gs": 4.33, "count": 144}, "Memory Tampering": {"asr1": 14.2, "asr2": 4.1, "asr3": 1.2, "refusal": 80.5, "gs": 4.62, "count": 169}, "Privilege Escalation": {"asr1": 0.0, "asr2": 0.0, "asr3": 0.0, "refusal": 56.2, "gs": 4.99, "count": 16}, "Resource Exhaustion": {"asr1": 18.8, "asr2": 0.0, "asr3": 0.0, "refusal": 43.8, "gs": 4.75, "count": 16}, "Sandbox Escape": {"asr1": 0.0, "asr2": 0.0, "asr3": 0.0, "refusal": 100.0, "gs": 4.44, "count": 16}}};
+const SCENARIOS = ["Code Development", "Data Analysis", "Document Review", "File Management", "System Administration", "Web Browsing"];
+const RISK_CATS = ["Dangerous Command Execution", "Data Exfiltration", "Information Leakage", "Configuration Tampering", "Jailbreak Attack", "Malicious Skill", "Memory Tampering", "Privilege Escalation", "Resource Exhaustion", "Sandbox Escape"];
+const MCOLORS = ['#0ea5e9','#8b5cf6','#10b981','#f59e0b','#ef4444','#ec4899','#6366f1','#14b8a6','#f97316','#84cc16','#06b6d4','#d946ef','#059669','#dc2626','#7c3aed'];
+
+// ── i18n ──
+let lang = 'en';
+const i18n = {
+    zh: {
+        subtitle: 'AI 智能体安全性与有用性综合评测',
+        models: '模型数', totalTests: '测试总数', testsPerModel: '每组测试数', scenarios: '场景数', riskTypes: '风险类型',
+        tabOverview: '总览', tabScenario: '按场景', tabRisk: '按风险类别',
+        bestOverall: '综合最佳', avgOverall: '平均综合分', bestSecurity: '安全最佳',
+        lowestASR: '最低 ASR@1', bestRubric: 'Rubric 最佳', highestASR: '最高 ASR@1',
+        score: '得分:', acrossModels: '共 {n} 个模型',
+        rank: '排名', model: '模型', overall: '综合分', security: '安全分', helpfulness: '有用分',
+        asr1: 'ASR@1', asr2: 'ASR@2', asr3: 'ASR@3', tcr: 'TCR', refusal: '明确拒绝率', runtime: '运行时间', tokens: 'Token消耗',
+        subOverall: 'S*50%+H*50%', subSecurity: '/100', subHelpfulness: '/100',
+        subAsr1: '>=1次有害', subAsr2: '>=2次有害', subAsr3: '全部有害', subRefusal: '比率 %', subRuntime: '小时', subTokens: '百万(M)',
+        subTcr: '得分>=4',
+        chartOverall: '综合得分（越高越好）', chartSecurity: '安全得分（越高越好）',
+        chartASR: 'ASR@1 攻击成功率（越低越好）', chartHelpfulness: '有用得分（越高越好）',
+        hmScenarioTitle: '各场景下模型表现', hmRiskTitle: '各风险类别下模型表现',
+        avgRiskTitle: '各风险类别平均 ASR@1（全部模型）',
+        metricLabel: '指标:',
+        mAsr1: 'ASR@1 (%)', mAsr2: 'ASR@2 (%)', mAsr3: 'ASR@3 (%)',
+        mRefusal: '拒绝率 (%)', mSafety: '综合安全评分 (均值/5)',
+        mSecurity: '安全得分', mHelpfulness: '有用得分', mOverall: '综合得分', mUtility: '实用得分',
+        fSecurityName: '安全分 (Security)', fHelpfulnessName: '有用分 (Helpfulness)',
+        fOverallName: '综合分 (Overall)', fASRName: 'ASR@k',
+        fSafety: '安全性', fReliability: '可靠性', fControllability: '可控性',
+        fUtilityVar: '实用性', fAdherence: '指令遵循', fSecVar: 'Security', fHelpVar: 'Helpfulness',
+        fSecurityNote: '三项 rubric 评分的均值，归一化到百分制',
+        fHelpfulnessNote: '实用性与指令遵循度的均值，归一化到百分制',
+        fOverallNote: '安全分与有用分的等权平均',
+        fASRExpr: '有害项中 ≥k 次运行产生有害输出的比例',
+        fASRNote: 'Attack Success Rate，越低越安全',
+        methodTitle: '评分方法',
+        rs: '安全性', rr: '可靠性', rc: '可控性',
+        subRs: '均值 /5', subRr: '均值 /5', subRc: '均值 /5',
+        footer: '由 Agent3Sigma-Stage 安全评测框架生成 | Advance 数据集',
+        generatedAt: '生成于',
+        exportCSV: '导出 CSV',
+        tipOverall: '安全分×50% + 有用分×50%',
+        tipSecurity: '(安全性+可靠性+可控性)/3/5×100',
+        tipHelpfulness: '(实用性+指令遵循)/2/5×100',
+        tipAsr1: '≥ 1次运行产生有害输出的比例',
+        tipAsr2: '≥ 2次运行产生有害输出的比例',
+        tipAsr3: '全部 3次运行均产生有害输出的比例',
+        tipRefusal: '模型明确拒绝执行有害任务的比例',
+        tipRuntime: '执行所有测试的总耗时（不含评估时间）',
+        tipTokens: '执行所有测试消耗的总 Token 数',
+        tipTcr: '良性样本中 seed_utility_score ≥ 4 的比例',
+        tokenNote: '* Opus 4.6、Sonnet 4.5、GPT-5.4、GPT-5.2、Qwen3.6-plus 的 Token 消耗量为基于 tiktoken 的估算值，其余模型为 API 返回的实际值。',
+        tipRs: '输出安全性 Rubric 均分 (/5)',
+        tipRr: '输出可靠性 Rubric 均分 (/5)',
+        tipRc: '执行可控性 Rubric 均分 (/5)',
+        scenarioNames: {'Code Development':'代码开发','Data Analysis':'数据分析','Document Review':'文档审查','File Management':'文件管理','System Administration':'系统管理','Web Browsing':'网页浏览'},
+        riskShort: {'Dangerous Command Execution':'危险命令','Data Exfiltration':'数据外泄','Information Leakage':'信息泄露','Configuration Tampering':'配置篡改','Jailbreak Attack':'越狱攻击','Malicious Skill':'恶意技能','Memory Tampering':'记忆篡改','Privilege Escalation':'权限提升','Resource Exhaustion':'资源耗尽','Sandbox Escape':'沙箱逃逸'}
+    },
+    en: {
+        subtitle: 'Comprehensive safety & helpfulness benchmarks for AI agents',
+        models: 'Models', totalTests: 'Total Tests', testsPerModel: 'Tests/Model', scenarios: 'Scenarios', riskTypes: 'Risk Types',
+        tabOverview: 'Overview', tabScenario: 'By Scenario', tabRisk: 'By Risk Category',
+        bestOverall: 'Best Overall', avgOverall: 'Avg Overall', bestSecurity: 'Best Security',
+        lowestASR: 'Lowest ASR@1', bestRubric: 'Best Rubric', highestASR: 'Highest ASR@1',
+        score: 'Score:', acrossModels: 'across {n} models',
+        rank: 'Rank', model: 'Model', overall: 'Overall', security: 'Security', helpfulness: 'Helpfulness',
+        asr1: 'ASR@1', asr2: 'ASR@2', asr3: 'ASR@3', tcr: 'TCR', refusal: 'Explicit Refusal', runtime: 'Runtime', tokens: 'Tokens',
+        subOverall: 'S*50%+H*50%', subSecurity: '/100', subHelpfulness: '/100',
+        subAsr1: '>=1 harmful', subAsr2: '>=2 harmful', subAsr3: 'all harmful', subRefusal: 'rate %', subRuntime: 'hours', subTokens: 'million(M)',
+        subTcr: 'score>=4',
+        chartOverall: 'Overall Score (higher is better)', chartSecurity: 'Security Score (higher is better)',
+        chartASR: 'ASR@1 - Attack Success Rate (lower is better)', chartHelpfulness: 'Helpfulness Score (higher is better)',
+        hmScenarioTitle: 'Model Performance by Scenario', hmRiskTitle: 'Model Performance by Risk Category',
+        avgRiskTitle: 'Average ASR@1 by Risk Category (all models)',
+        metricLabel: 'Metric:',
+        mAsr1: 'ASR@1 (%)', mAsr2: 'ASR@2 (%)', mAsr3: 'ASR@3 (%)',
+        mRefusal: 'Refusal Rate (%)', mSafety: 'General Safety (avg /5)',
+        mSecurity: 'Security Score', mHelpfulness: 'Helpfulness Score', mOverall: 'Overall Score', mUtility: 'Utility Score',
+        fSecurityName: 'Security Score', fHelpfulnessName: 'Helpfulness Score',
+        fOverallName: 'Overall Score', fASRName: 'ASR@k',
+        fSafety: 'Safety', fReliability: 'Reliability', fControllability: 'Controllability',
+        fUtilityVar: 'Utility', fAdherence: 'Instruction Adherence', fSecVar: 'Security', fHelpVar: 'Helpfulness',
+        fSecurityNote: 'Mean of 3 rubric scores, normalized to 0-100',
+        fHelpfulnessNote: 'Mean of utility & instruction adherence, normalized to 0-100',
+        fOverallNote: 'Equal-weight average of Security and Helpfulness',
+        fASRExpr: 'Proportion of harmful items with >=k harmful runs',
+        fASRNote: 'Attack Success Rate - lower is safer',
+        methodTitle: 'Scoring Methodology',
+        rs: 'Safety', rr: 'Reliability', rc: 'Controllability',
+        subRs: 'avg /5', subRr: 'avg /5', subRc: 'avg /5',
+        footer: 'Generated by Agent3Sigma-Stage Security Evaluation Framework | Advance Dataset',
+        generatedAt: 'Generated at',
+        exportCSV: 'Export CSV',
+        tipOverall: 'Security×50% + Helpfulness×50%',
+        tipSecurity: '(Safety+Reliability+Controllability)/3/5×100',
+        tipHelpfulness: '(Utility+Instruction Adherence)/2/5×100',
+        tipAsr1: 'Proportion with ≥ 1 harmful run',
+        tipAsr2: 'Proportion with ≥ 2 harmful runs',
+        tipAsr3: 'Proportion with all 3 runs harmful',
+        tipRefusal: 'Rate at which model explicitly refuses harmful tasks',
+        tipRuntime: 'Total execution time for all tests (excluding judge time)',
+        tipTokens: 'Total tokens consumed across all tests',
+        tipTcr: 'Proportion of benign items with utility score ≥ 4',
+        tokenNote: '* Token usage for Opus 4.6, Sonnet 4.5, GPT-5.4, GPT-5.2 and Qwen3.6-plus is estimated via tiktoken; all others are actual values returned by the API.',
+        tipRs: 'Output Safety rubric avg (/5)',
+        tipRr: 'Output Reliability rubric avg (/5)',
+        tipRc: 'Execution Controllability rubric avg (/5)',
+        scenarioNames: {'Code Development':'Code Development','Data Analysis':'Data Analysis','Document Review':'Document Review','File Management':'File Management','System Administration':'System Administration','Web Browsing':'Web Browsing'},
+        riskShort: {'Dangerous Command Execution':'Cmd Exec','Data Exfiltration':'Data Exfil','Information Leakage':'Info Leak','Configuration Tampering':'Config Tamper','Jailbreak Attack':'Jailbreak','Malicious Skill':'Mal. Skill','Memory Tampering':'Mem Tamper','Privilege Escalation':'Priv Esc','Resource Exhaustion':'Res Exhaust','Sandbox Escape':'Sandbox Esc'}
+    }
+};
+
+function T(key) { return i18n[lang][key] || key; }
+
+function switchLang(newLang) {
+    lang = newLang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+    document.getElementById('hero-subtitle').textContent = T('subtitle');
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = T(el.dataset.i18n); });
+    renderFooter();
+    document.getElementById('method-title').textContent = T('methodTitle');
+    document.getElementById('export-btn').textContent = T('exportCSV');
+
+    renderCards();
+    renderTable();
+    renderBarCharts();
+    document.getElementById('panel-scenario').innerHTML = '';
+    document.getElementById('panel-risk').innerHTML = '';
+    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+    if (activeTab === 'scenario') renderScenario();
+    if (activeTab === 'risk') renderRisk();
+}
+
+// ── Utilities ──
+function cc(v, good, warn, rev) {
+    if (rev) return v <= good ? 'g' : v <= warn ? 'w' : 'b';
+    return v >= good ? 'g' : v >= warn ? 'w' : 'b';
+}
+
+function heatColor(v, lo, hi, rev) {
+    if (v === null || v === undefined) return '#f1f5f9';
+    let t = hi === lo ? 0.5 : (v - lo) / (hi - lo);
+    t = Math.max(0, Math.min(1, t));
+    if (rev) t = 1 - t;
+    let r, g, b2;
+    if (t <= 0.5) {
+        const p = t * 2;
+        r = Math.round(16 + (245-16)*p); g = Math.round(185 + (158-185)*p); b2 = Math.round(129 + (11-129)*p);
+    } else {
+        const p = (t-0.5)*2;
+        r = Math.round(245 + (239-245)*p); g = Math.round(158 + (68-158)*p); b2 = Math.round(11 + (68-11)*p);
+    }
+    return `rgb(${r},${g},${b2})`;
+}
+
+function textOnBg(bg) {
+    const m = bg.match(/\d+/g);
+    if (!m) return '#1e293b';
+    const lum = (parseInt(m[0])*299 + parseInt(m[1])*587 + parseInt(m[2])*114) / 1000;
+    return lum > 160 ? '#1e293b' : '#fff';
+}
+
+// ── Tabs ──
+function switchTab(id) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
+    if (id === 'scenario' && !document.getElementById('panel-scenario').innerHTML) renderScenario();
+    if (id === 'risk' && !document.getElementById('panel-risk').innerHTML) renderRisk();
+}
+
+// ── Summary Cards ──
+function renderCards() {
+    const best = [...data].sort((a,b2) => b2.overall - a.overall)[0];
+    const avg = (data.reduce((s,d) => s + d.overall, 0) / data.length).toFixed(1);
+    const bestSec = [...data].sort((a,b2) => b2.security - a.security)[0];
+    const bestASR = [...data].sort((a,b2) => a.asr1 - b2.asr1)[0];
+    const bestRubric = [...data].sort((a,b2) => (b2.rs+b2.rr+b2.rc) - (a.rs+a.rr+a.rc))[0];
+    const worstASR = [...data].sort((a,b2) => b2.asr1 - a.asr1)[0];
+    document.getElementById('cards').innerHTML = `<div class="cards">
+        <div class="card"><div class="c-label">${T('bestOverall')}</div><div class="c-val" style="color:var(--blue)">${best.overall}</div><div class="c-sub">${best.model}</div></div>
+        <div class="card"><div class="c-label">${T('avgOverall')}</div><div class="c-val" style="color:var(--green)">${avg}</div><div class="c-sub">${T('acrossModels').replace('{n}', data.length)}</div></div>
+        <div class="card"><div class="c-label">${T('bestSecurity')}</div><div class="c-val" style="color:var(--indigo)">${bestSec.security}</div><div class="c-sub">${bestSec.model}</div></div>
+        <div class="card"><div class="c-label">${T('lowestASR')}</div><div class="c-val" style="color:var(--green)">${bestASR.asr1}%</div><div class="c-sub">${bestASR.model}</div></div>
+        <div class="card"><div class="c-label">${T('bestRubric')}</div><div class="c-val" style="color:var(--purple)">${((bestRubric.rs+bestRubric.rr+bestRubric.rc)/3).toFixed(2)}</div><div class="c-sub">${bestRubric.model}</div></div>
+        <div class="card"><div class="c-label">${T('highestASR')}</div><div class="c-val" style="color:var(--red)">${worstASR.asr1}%</div><div class="c-sub">${worstASR.model}</div></div>
+    </div>`;
+}
+
+// ── Sortable Table ──
+let sortKey = 'overall', sortAsc = false;
+
+function renderTable() {
+    const d = [...data].sort((a,b2) => {
+        const va = a[sortKey], vb = b2[sortKey];
+        if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+        return sortAsc ? va - vb : vb - va;
+    });
+    const tips = {overall:T('tipOverall'), security:T('tipSecurity'), helpfulness:T('tipHelpfulness'), asr1:T('tipAsr1'), asr2:T('tipAsr2'), asr3:T('tipAsr3'), tcr:T('tipTcr'), refusal:T('tipRefusal'), rs:T('tipRs'), rr:T('tipRr'), rc:T('tipRc'), runtime:T('tipRuntime'), tokens:T('tipTokens')};
+    const cols = [
+        [null, T('rank'), ''], ['model', T('model'), ''],
+        ['overall', T('overall'), T('subOverall')],
+        ['security', T('security'), T('subSecurity'), true], ['helpfulness', T('helpfulness'), T('subHelpfulness'), true],
+        ['asr1', T('asr1'), T('subAsr1')], ['asr2', T('asr2'), T('subAsr2')], ['asr3', T('asr3'), T('subAsr3')],
+        ['tcr', T('tcr'), T('subTcr')], ['refusal', T('refusal'), T('subRefusal'), true],
+        ['rs', T('rs'), T('subRs'), true], ['rr', T('rr'), T('subRr'), true], ['rc', T('rc'), T('subRc'), true],
+        ['runtime', T('runtime'), T('subRuntime')], ['tokens', T('tokens'), T('subTokens')],
+    ];
+    const sepIdx = new Set([3, 5, 10, 13]);
+    let h = '<div class="table-wrap"><table class="lb"><thead><tr>';
+    cols.forEach((c, i) => {
+        const sep = sepIdx.has(i) ? ' sep' : '';
+        const tip = c[0] && tips[c[0]] ? ` data-tip="${tips[c[0]]}"` : '';
+        if (!c[0] || c[0] === 'model') {
+            h += `<th class="${sep}"${c[0]==='model'?' style="text-align:left"':''}${tip}>` + c[1];
+        } else {
+            const act = sortKey === c[0];
+            const ar = act ? (sortAsc ? '\u25B2' : '\u25BC') : '\u25BC';
+            h += `<th class="${act?'active':''}${sep}" data-k="${c[0]}"${tip}>` + c[1] + `<span class="arrow">${ar}</span>`;
+        }
+        if (c[2]) h += `<span class="th-sub">${c[2]}</span>`;
+        h += '</th>';
+    });
+    h += '</tr></thead><tbody>';
+    d.forEach((r, i) => {
+        const rk = i+1;
+        const rc = rk<=3 ? ` rk-${rk}` : '';
+        const medal = rk===1?' &#x1F947;':rk===2?' &#x1F948;':rk===3?' &#x1F949;':'';
+        h += '<tr>';
+        h += `<td><span class="rk${rc}">${rk}${medal}</span></td>`;
+        h += `<td class="mdl">${r.model}</td>`;
+        h += `<td class="sep"><span class="os ${cc(r.overall,75,65,false)}">${r.overall}</span></td>`;
+        h += `<td class="${cc(r.security,75,65,false)}">${r.security}</td>`;
+        h += `<td class="${cc(r.helpfulness,80,70,false)}">${r.helpfulness}</td>`;
+        h += `<td class="sep ${cc(r.asr1,40,70,true)}">${r.asr1}%</td>`;
+        h += `<td class="${cc(r.asr2,30,60,true)}">${r.asr2}%</td>`;
+        h += `<td class="${cc(r.asr3,20,50,true)}">${r.asr3}%</td>`;
+        h += `<td class="${cc(r.tcr,85,70,false)}">${r.tcr}%</td>`;
+        h += `<td class="${cc(r.refusal,60,40,false)}">${r.refusal}%</td>`;
+        h += `<td class="sep ${cc(r.rs,4.0,3.0,false)}">${r.rs.toFixed(2)}</td>`;
+        h += `<td class="${cc(r.rr,4.0,3.0,false)}">${r.rr.toFixed(2)}</td>`;
+        h += `<td class="${cc(r.rc,4.0,3.0,false)}">${r.rc.toFixed(2)}</td>`;
+        h += `<td class="sep" style="text-align:right">${r.runtime.toFixed(2)}h</td>`;
+        h += `<td style="text-align:right">${r.tokens > 0 ? (r.tokens/1e6).toFixed(1)+'M' : '-'}</td>`;
+        h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+    h += `<p class="table-note">${T('tokenNote')}</p>`;
+
+    const wrap = document.createElement('div');
+    wrap.innerHTML = h;
+    const panel = document.getElementById('panel-overview');
+    const oldWrap = panel.querySelector('.table-section');
+    const section = document.createElement('div');
+    section.className = 'table-section';
+    section.innerHTML = h;
+    if (oldWrap) oldWrap.replaceWith(section);
+    else panel.prepend(section);
+
+    panel.querySelectorAll('th[data-k]').forEach(th => {
+        th.onclick = () => {
+            const k = th.dataset.k;
+            if (sortKey === k) sortAsc = !sortAsc;
+            else { sortKey = k; const isRev = ['asr1','asr2','asr3'].includes(k); sortAsc = isRev; }
+            renderTable();
+        };
+    });
+}
+
+// ── Bar Charts ──
+const modelColorMap = {};
+data.forEach((d, i) => { modelColorMap[d.model] = MCOLORS[i % MCOLORS.length]; });
+
+function renderBarCharts() {
+    function bc(title, key, suffix, maxV, rev) {
+        const sorted = [...data].sort((a,b2) => rev ? a[key]-b2[key] : b2[key]-a[key]);
+        let h = `<div class="ch"><h3>${title}</h3>`;
+        sorted.forEach((d,i) => {
+            const v = d[key]; const pct = Math.min(v/maxV*100,100);
+            const c = modelColorMap[d.model] || MCOLORS[i % MCOLORS.length];
+            h += `<div class="brow"><div class="blbl">${d.model}</div><div class="btrk"><div class="bval" style="width:${pct}%;background:${c};animation:growBar 0.6s ${i*0.06}s ease both">${typeof v==='number'&&v%1?v.toFixed(1):v}${suffix}</div></div></div>`;
+        });
+        return h + '</div>';
+    }
+    let h = '<div class="charts">';
+    h += bc(T('chartOverall'),'overall','',100,false);
+    h += bc(T('chartSecurity'),'security','',100,false);
+    h += bc(T('chartASR'),'asr1','%',100,true);
+    h += bc(T('chartHelpfulness'),'helpfulness','',100,false);
+    h += '</div>';
+
+    const panel = document.getElementById('panel-overview');
+    const existing = panel.querySelector('.charts');
+    if (existing) existing.outerHTML = h;
+    else panel.insertAdjacentHTML('beforeend', h);
+}
+
+// ── Scenario Heatmap ──
+function renderScenario() {
+    const models = data.map(d => d.model);
+    const metricKeys = [
+        {key:'asr1', lk:'mAsr1', rev:false, suffix:'%'},
+        {key:'asr2', lk:'mAsr2', rev:false, suffix:'%'},
+        {key:'asr3', lk:'mAsr3', rev:false, suffix:'%'},
+        {key:'refusal', lk:'mRefusal', rev:true, suffix:'%'},
+        {key:'gs', lk:'mSafety', rev:true, suffix:''},
+        {key:'security', lk:'mSecurity', rev:true, suffix:''},
+        {key:'helpfulness', lk:'mHelpfulness', rev:true, suffix:''},
+        {key:'overall', lk:'mOverall', rev:true, suffix:''},
+        {key:'utility', lk:'mUtility', rev:true, suffix:''},
+    ];
+    let curMetric = 'asr1';
+
+    function renderHM(metric) {
+        const mDef = metricKeys.find(m => m.key === metric);
+        const vals = [];
+        models.forEach(m => { SCENARIOS.forEach(sc => { const v = scenarioData[m]?.[sc]?.[metric]; if (v != null) vals.push(v); }); });
+        const lo = vals.length ? Math.min(...vals) : 0;
+        const hi = vals.length ? Math.max(...vals) : 100;
+
+        let h = `<div class="hm-wrap"><table class="hm"><thead><tr><th>${T('model')}</th>`;
+        SCENARIOS.forEach(sc => { h += `<th>${T('scenarioNames')[sc] || sc}</th>`; });
+        h += '</tr></thead><tbody>';
+        models.forEach(m => {
+            h += `<tr><td>${m}</td>`;
+            SCENARIOS.forEach(sc => {
+                const v = scenarioData[m]?.[sc]?.[metric];
+                if (v == null) { h += '<td><span class="na">&mdash;</span></td>'; return; }
+                const bg = heatColor(v, lo, hi, mDef.rev);
+                const fg = textOnBg(bg);
+                const display = v.toFixed(1) + mDef.suffix;
+                h += `<td><span class="cell" style="background:${bg};color:${fg}">${display}</span></td>`;
+            });
+            h += '</tr>';
+        });
+        h += '</tbody></table></div>';
+        return h;
+    }
+
+    let h = `<div class="hm-section"><h3>${T('hmScenarioTitle')}</h3>`;
+    h += `<div class="hm-controls"><label>${T('metricLabel')}</label><select id="sc-metric">`;
+    metricKeys.forEach(m => { h += `<option value="${m.key}">${T(m.lk)}</option>`; });
+    h += '</select></div>';
+    h += '<div id="sc-heatmap">' + renderHM(curMetric) + '</div></div>';
+
+    document.getElementById('panel-scenario').innerHTML = h;
+    document.getElementById('sc-metric').onchange = function() {
+        curMetric = this.value;
+        document.getElementById('sc-heatmap').innerHTML = renderHM(curMetric);
+    };
+}
+
+// ── Risk Category Heatmap + Avg Chart ──
+function renderRisk() {
+    const models = data.map(d => d.model);
+    const metricKeys = [
+        {key:'asr1', lk:'mAsr1', rev:false, suffix:'%'},
+        {key:'asr2', lk:'mAsr2', rev:false, suffix:'%'},
+        {key:'asr3', lk:'mAsr3', rev:false, suffix:'%'},
+        {key:'refusal', lk:'mRefusal', rev:true, suffix:'%'},
+        {key:'gs', lk:'mSafety', rev:true, suffix:''},
+    ];
+    let curMetric = 'asr1';
+
+    function renderHM(metric) {
+        const mDef = metricKeys.find(m => m.key === metric);
+        const vals = [];
+        models.forEach(m => { RISK_CATS.forEach(rc => { const v = riskData[m]?.[rc]?.[metric]; if (v != null) vals.push(v); }); });
+        const lo = vals.length ? Math.min(...vals) : 0;
+        const hi = vals.length ? Math.max(...vals) : 100;
+
+        let h = `<div class="hm-wrap"><table class="hm"><thead><tr><th>${T('model')}</th>`;
+        RISK_CATS.forEach(rc => {
+            const short = T('riskShort')[rc] || rc;
+            h += `<th title="${rc}">${short}</th>`;
+        });
+        h += '</tr></thead><tbody>';
+        models.forEach(m => {
+            h += `<tr><td>${m}</td>`;
+            RISK_CATS.forEach(rc => {
+                const v = riskData[m]?.[rc]?.[metric];
+                if (v == null) { h += '<td><span class="na">&mdash;</span></td>'; return; }
+                const bg = heatColor(v, lo, hi, mDef.rev);
+                const fg = textOnBg(bg);
+                h += `<td><span class="cell" style="background:${bg};color:${fg}">${v.toFixed(1)}${mDef.suffix}</span></td>`;
+            });
+            h += '</tr>';
+        });
+        h += '</tbody></table></div>';
+        return h;
+    }
+
+    function renderAvgChart() {
+        const avgs = [];
+        RISK_CATS.forEach(rc => {
+            const vals = models.map(m => riskData[m]?.[rc]?.asr1).filter(v => v != null);
+            const avg = vals.length ? vals.reduce((a,b2) => a+b2,0)/vals.length : 0;
+            avgs.push({cat: rc, avg: Math.round(avg*10)/10});
+        });
+        avgs.sort((a,b2) => b2.avg - a.avg);
+        let h = `<div class="risk-avg"><h3>${T('avgRiskTitle')}</h3>`;
+        avgs.forEach((a,i) => {
+            const pct = Math.min(a.avg, 100);
+            const c = a.avg<=40?'#10b981':a.avg<=70?'#f59e0b':'#ef4444';
+            const label = T('riskShort')[a.cat] || a.cat;
+            h += `<div class="brow"><div class="blbl">${label}</div><div class="btrk"><div class="bval" style="width:${pct}%;background:${c}">${a.avg}%</div></div></div>`;
+        });
+        h += '</div>';
+        return h;
+    }
+
+    let h = `<div class="hm-section"><h3>${T('hmRiskTitle')}</h3>`;
+    h += `<div class="hm-controls"><label>${T('metricLabel')}</label><select id="rk-metric">`;
+    metricKeys.forEach(m => { h += `<option value="${m.key}">${T(m.lk)}</option>`; });
+    h += '</select></div>';
+    h += '<div id="rk-heatmap">' + renderHM(curMetric) + '</div></div>';
+    h += renderAvgChart();
+
+    document.getElementById('panel-risk').innerHTML = h;
+    document.getElementById('rk-metric').onchange = function() {
+        curMetric = this.value;
+        document.getElementById('rk-heatmap').innerHTML = renderHM(curMetric);
+    };
+}
+
+// ── Bar grow animation ──
+const style = document.createElement('style');
+style.textContent = '@keyframes growBar { from { width: 0 !important; } }';
+document.head.appendChild(style);
+
+
+
+// ── Methodology toggle ──
+document.getElementById('method-toggle').onclick = function() {
+    this.classList.toggle('open');
+    document.getElementById('method-body').classList.toggle('open');
+};
+
+
+// ── Theme Toggle ──
+function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.dataset.theme === 'dark';
+    html.dataset.theme = isDark ? '' : 'dark';
+    document.getElementById('theme-btn').textContent = isDark ? '🌙' : '☀️';
+}
+
+// ── CSV Export ──
+function exportCSV() {
+    const headers = ['Model','Overall','Security','Helpfulness','ASR@1','ASR@2','ASR@3','TCR','Refusal','Safety(rs)','Reliability(rr)','Controllability(rc)','Runtime(h)','Tokens'];
+    const rows = data.map(d => [d.model, d.overall, d.security, d.helpfulness, d.asr1, d.asr2, d.asr3, d.tcr, d.refusal, d.rs, d.rr, d.rc, d.runtime, d.tokens]);
+    let csv = headers.join(',') + '\n';
+    rows.forEach(r => { csv += r.join(',') + '\n'; });
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'openclaw_leaderboard.csv'; a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ── Footer with version & date ──
+function renderFooter() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const dateStr = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+    document.getElementById('footer').textContent = T('footer') + ' | v2026.3.12 | ' + T('generatedAt') + ' ' + dateStr;
+}
+
+// ── Init ──
+switchLang('en');
+</script>
+
+</body>
+</html>

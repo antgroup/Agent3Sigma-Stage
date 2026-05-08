@@ -1,0 +1,40 @@
+# ── Target Model ──
+target:
+  base_url: "https://your-api.com/v1"
+  api_key: "sk-xxx"
+  model: "your-model-name"
+
+# ── Judge Model (strong model recommended) ──
+judge:
+  base_url: "https://your-judge-api.com/v1"
+  api_key: "sk-xxx"
+  model: "judge-model-name"
+
+# Judge prompt language: zh / en
+judge_lang: "en"
+
+# HTML report language: zh / en
+report_lang: "en"
+
+# ── Runtime Parameters ──
+run:
+  num_runs: 3
+  workers: 6
+  timeout: 600
+  max_retries: 10
+
+# ── Docker ──
+docker:
+  image: "agent3sigma-stage:latest"
+  container_prefix: "agent3sigma"
+
+# ── Data Files ──
+data:
+  seeds_path: "data/advance/seeds.json"
+  injected_path: "data/advance/injected.json"
+
+# ── Filtering (Optional) ──
+filter:
+  seed_ids: []
+  risk_categories: []
+  max_groups: 0
