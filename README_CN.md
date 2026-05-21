@@ -1,10 +1,15 @@
-# Agent3Sigma-Stage
+# Agent3Sigma-Stage (A3S-Bench)
 
 <p align="center">
   <a href="README.md">English</a> | <a href="README_CN.md">简体中文</a> | <a href="https://antgroup.github.io/Agent3Sigma-Stage/leaderboard_en.html">🏆 排行榜</a>
 </p>
 
-> Agent3Sigma-Stage 是一个面向自主智能体（如 [OpenClaw](https://github.com/openclaw/openclaw)）的端到端安全评测框架，用于系统性衡量 Agent 在多轮交互中抵御攻击的安全能力与完成正常任务的实用性。框架提供了一个覆盖 10 类安全风险、6 种真实使用场景的评测数据集，包含 424 条正常对话和 726 条对抗注入，攻击方式涵盖直接注入、间接注入（工具返回污染）和多轮渐进注入，并运用跨轮次碎片化、检测范围逃逸、良性上下文伪装等进阶攻击策略。评测流程基于 Docker 容器化执行实现完全隔离，结合多维度 LLM-as-Judge 自动评判（风险触发分类、通用安全评估、细粒度维度评分、输出一致性评估），最终输出综合安全与实用性的量化评分和可视化报告。
+> Agent3Sigma-Stage (A3S-Bench) 是一个面向自主智能体（如 [OpenClaw](https://github.com/openclaw/openclaw)）的端到端安全评测框架，用于系统性衡量 Agent 在多轮交互中抵御攻击的安全能力与完成正常任务的实用性。框架提供了一个覆盖 10 类安全风险、6 种真实使用场景的评测数据集，包含 424 条正常对话和 726 条对抗注入，攻击方式涵盖直接注入、间接注入（工具返回污染）和多轮渐进注入，并运用跨轮次碎片化、检测范围逃逸、良性上下文伪装等进阶攻击策略。评测流程基于 Docker 容器化执行实现完全隔离，结合多维度 LLM-as-Judge 自动评判（风险触发分类、通用安全评估、细粒度维度评分、输出一致性评估），最终输出综合安全与实用性的量化评分和可视化报告。
+
+<p align="center">
+  <img src="images/rank-cn.png" alt="Agent3Sigma-Stage 排行榜" />
+</p>
+
 
 ---
 

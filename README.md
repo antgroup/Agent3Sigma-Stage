@@ -1,10 +1,14 @@
-# Agent3Sigma-Stage
+# Agent3Sigma-Stage (A3S-Bench)
 
 <p align="center">
   <a href="README.md">English</a> | <a href="README_CN.md">简体中文</a> | <a href="https://antgroup.github.io/Agent3Sigma-Stage/leaderboard_en.html">🏆 Leaderboard</a>
 </p>
 
-> Agent3Sigma-Stage is an end-to-end security evaluation framework for autonomous agents (e.g., [OpenClaw](https://github.com/openclaw/openclaw)), designed to systematically measure both an Agent's ability to resist attacks during multi-turn interactions and its utility in completing legitimate tasks. The framework provides an evaluation dataset covering 10 security risk categories across 6 real-world usage scenarios, comprising 424 benign conversations and 726 adversarial injections. Attack methods include direct injection, indirect injection (tool return poisoning), and multi-turn progressive injection, employing advanced attack strategies such as cross-turn fragmentation, detection-scope evasion, and benign-context concealment. The evaluation pipeline uses Docker container isolation for fully sandboxed execution, combined with multi-dimensional LLM-as-Judge automated assessment (risk trigger classification, general safety evaluation, fine-grained rubric scoring, and output reliability evaluation), ultimately producing quantitative scores and visual reports that integrate both security and utility.
+> Agent3Sigma-Stage (A3S-Bench) is an end-to-end security evaluation framework for autonomous agents (e.g., [OpenClaw](https://github.com/openclaw/openclaw)), designed to systematically measure both an Agent's ability to resist attacks during multi-turn interactions and its utility in completing legitimate tasks. The framework provides an evaluation dataset covering 10 security risk categories across 6 real-world usage scenarios, comprising 424 benign conversations and 726 adversarial injections. Attack methods include direct injection, indirect injection (tool return poisoning), and multi-turn progressive injection, employing advanced attack strategies such as cross-turn fragmentation, detection-scope evasion, and benign-context concealment. The evaluation pipeline uses Docker container isolation for fully sandboxed execution, combined with multi-dimensional LLM-as-Judge automated assessment (risk trigger classification, general safety evaluation, fine-grained rubric scoring, and output reliability evaluation), ultimately producing quantitative scores and visual reports that integrate both security and utility.
+
+<p align="center">
+  <img src="images/rank-en.png" alt="Agent3Sigma-Stage Leaderboard" />
+</p>
 
 ---
 
