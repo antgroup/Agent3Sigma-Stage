@@ -1,7 +1,7 @@
 # Agent3Sigma-Stage (A3S-Bench)
 
 <p align="center">
-  <a href="README.md">English</a> | <a href="README_CN.md">简体中文</a> | <a href="https://antgroup.github.io/Agent3Sigma-Stage/leaderboard_en.html">🏆 排行榜</a>
+  <a href="README.md">English</a> | <a href="README_CN.md">简体中文</a> | <a href="https://antgroup.github.io/Agent3Sigma-Stage/leaderboard_en.html">🏆 排行榜</a> | <a href="http://arxiv.org/abs/2605.22321">📄 论文</a>
 </p>
 
 > Agent3Sigma-Stage (A3S-Bench) 是一个面向自主智能体（如 [OpenClaw](https://github.com/openclaw/openclaw)）的端到端安全评测框架，用于系统性衡量 Agent 在多轮交互中抵御攻击的安全能力与完成正常任务的实用性。框架提供了一个覆盖 10 类安全风险、6 种真实使用场景的评测数据集，包含 424 条正常对话和 726 条对抗注入，攻击方式涵盖直接注入、间接注入（工具返回污染）和多轮渐进注入，并运用跨轮次碎片化、检测范围逃逸、良性上下文伪装等进阶攻击策略。评测流程基于 Docker 容器化执行实现完全隔离，结合多维度 LLM-as-Judge 自动评判（风险触发分类、通用安全评估、细粒度维度评分、输出一致性评估），最终输出综合安全与实用性的量化评分和可视化报告。
@@ -84,7 +84,7 @@
 - **检测范围逃逸（Detection-scope Evasion）** — 将攻击载荷嵌入工作空间中的文档、Skill 文件或配置等制品中，绕过仅监控用户消息和工具调用通道的检测机制。
 - **良性上下文伪装（Benign-context Concealment）** — 将恶意意图隐藏在语义上与当前合法工作流相容的正常指令中，利用内容过滤器对上下文语义的依赖来规避检测。
 
-> 关于攻击策略与风险分类体系的详细信息，请参阅我们的学术论文（即将上传）。
+> 关于攻击策略与风险分类体系的详细信息，请参阅我们的[学术论文](http://arxiv.org/abs/2605.22321)。
 
 ---
 
@@ -349,4 +349,14 @@ This project is licensed under the [Apache License 2.0](LICENSE).
 
 ## 📖 Citation
 
-Our research paper will be available soon.
+```bibtex
+@misc{ma2026benchmarkingautonomousagentstemporal,
+      title={Benchmarking Autonomous Agents against Temporal, Spatial, and Semantic Evasions}, 
+      author={Jianan Ma and Xiaohu Du and Ruixiao Lin and Yaoxiang Bian and Jialuo Chen and Jingyi Wang and Xiaofang Yang and Shiwen Cui and Changhua Meng and Xinhao Deng and Zhen Wang},
+      year={2026},
+      eprint={2605.22321},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2605.22321}, 
+}
+```

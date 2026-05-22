@@ -1,7 +1,7 @@
 # Agent3Sigma-Stage (A3S-Bench)
 
 <p align="center">
-  <a href="README.md">English</a> | <a href="README_CN.md">简体中文</a> | <a href="https://antgroup.github.io/Agent3Sigma-Stage/leaderboard_en.html">🏆 Leaderboard</a>
+  <a href="README.md">English</a> | <a href="README_CN.md">简体中文</a> | <a href="https://antgroup.github.io/Agent3Sigma-Stage/leaderboard_en.html">🏆 Leaderboard</a> | <a href="http://arxiv.org/abs/2605.22321">📄 Paper</a>
 </p>
 
 > Agent3Sigma-Stage (A3S-Bench) is an end-to-end security evaluation framework for autonomous agents (e.g., [OpenClaw](https://github.com/openclaw/openclaw)), designed to systematically measure both an Agent's ability to resist attacks during multi-turn interactions and its utility in completing legitimate tasks. The framework provides an evaluation dataset covering 10 security risk categories across 6 real-world usage scenarios, comprising 424 benign conversations and 726 adversarial injections. Attack methods include direct injection, indirect injection (tool return poisoning), and multi-turn progressive injection, employing advanced attack strategies such as cross-turn fragmentation, detection-scope evasion, and benign-context concealment. The evaluation pipeline uses Docker container isolation for fully sandboxed execution, combined with multi-dimensional LLM-as-Judge automated assessment (risk trigger classification, general safety evaluation, fine-grained rubric scoring, and output reliability evaluation), ultimately producing quantitative scores and visual reports that integrate both security and utility.
@@ -83,7 +83,7 @@ The adversarial samples in the dataset employ three advanced attack strategies t
 - **Detection-scope Evasion** — Embeds attack payloads into workspace artifacts such as documents, skill files, or configurations, bypassing detection mechanisms that only monitor user messages and tool call channels.
 - **Benign-context Concealment** — Hides malicious intent within normal instructions that are semantically compatible with the current legitimate workflow, exploiting content filters' reliance on contextual semantics to evade detection.
 
-> For detailed information about attack strategies and the risk taxonomy, please refer to our research paper (coming soon).
+> For detailed information about attack strategies and the risk taxonomy, please refer to our [research paper](http://arxiv.org/abs/2605.22321).
 
 ---
 
@@ -348,4 +348,14 @@ This project is licensed under the [Apache License 2.0](LICENSE).
 
 ## 📖 Citation
 
-Our research paper will be available soon.
+```bibtex
+@misc{ma2026benchmarkingautonomousagentstemporal,
+      title={Benchmarking Autonomous Agents against Temporal, Spatial, and Semantic Evasions}, 
+      author={Jianan Ma and Xiaohu Du and Ruixiao Lin and Yaoxiang Bian and Jialuo Chen and Jingyi Wang and Xiaofang Yang and Shiwen Cui and Changhua Meng and Xinhao Deng and Zhen Wang},
+      year={2026},
+      eprint={2605.22321},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2605.22321}, 
+}
+```
