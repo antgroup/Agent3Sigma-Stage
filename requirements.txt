@@ -1,0 +1,9 @@
+# Requirements for ASEval (generation + evaluation)
+#
+# The A3S-Bench dataset under data/ needs no dependencies to read.
+# The generation pipeline and evaluation harness need the packages below.
+# Docker is invoked via the CLI (see evaluation/), so no Python Docker SDK is required.
+
+openai>=1.0
+pyyaml>=6.0
+tiktoken>=0.5

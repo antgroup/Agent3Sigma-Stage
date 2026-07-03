@@ -1,0 +1,34 @@
+{
+  "seed_models": [
+    {
+      "name": "GPT-5.2",
+      "base_url": "https://your-api.com/v1",
+      "api_key": "sk-xxx",
+      "model": "GPT-5.2"
+    },
+    {
+      "name": "claude-opus-4-5",
+      "base_url": "https://your-api.com/v1",
+      "api_key": "sk-xxx",
+      "model": "claude-opus-4-5-20251124"
+    },
+    {
+      "name": "Kimi-K2.5",
+      "base_url": "https://your-api.com/v1",
+      "api_key": "sk-xxx",
+      "model": "Kimi-K2.5"
+    }
+  ],
+  "judge_model": {
+    "name": "Qwen3.5-397B-A17B",
+    "base_url": "https://your-api.com/v1",
+    "api_key": "sk-xxx",
+    "model": "Qwen3.5-397B-A17B"
+  },
+  "inject_model": {
+    "name": "claude-opus-4-5",
+    "base_url": "https://your-api.com/v1",
+    "api_key": "sk-xxx",
+    "model": "claude-opus-4-5-20251124"
+  }
+}

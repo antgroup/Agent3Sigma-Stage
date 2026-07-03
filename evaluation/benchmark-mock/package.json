@@ -1,0 +1,12 @@
+{
+  "name": "benchmark-mock",
+  "version": "1.0.0",
+  "description": "Mock tool responses for security benchmark testing",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test"
+  },
+  "keywords": ["benchmark", "mock", "security", "openclaw"],
+  "license": "MIT"
+}

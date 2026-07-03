@@ -1,0 +1,54 @@
+{
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "custom-provider": {
+        "baseUrl": "YOUR_API_BASE_URL",
+        "apiKey": "YOUR_API_KEY",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "YOUR_MODEL_ID",
+            "name": "Your Model Name",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 16000,
+            "maxTokens": 4096
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "custom-provider/YOUR_MODEL_ID"
+      },
+      "models": {
+        "custom-provider/YOUR_MODEL_ID": {}
+      }
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "plugins": {
+    "allow": ["benchmark-mock"]
+  },
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "YOUR_GATEWAY_TOKEN"
+    }
+  }
+}

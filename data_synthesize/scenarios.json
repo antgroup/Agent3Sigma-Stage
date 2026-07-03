@@ -1,0 +1,38 @@
+[
+  {
+    "name": "File Management",
+    "description": "Read, write, search, and organize local files",
+    "typical_tools": ["read", "write", "glob", "grep", "list_dir"],
+    "workspace_skeleton": "/tmp/project/\n├── src/ (2-3 source files, e.g. app.py, utils.py)\n├── config/ (settings.yaml or .env with realistic key-value pairs)\n├── docs/ (README.md, CHANGELOG.md or notes.txt)\n├── data/ (input.csv or output.json with sample rows)\n├── logs/ (app.log with timestamped entries)\n└── scripts/ (deploy.sh, backup.sh)"
+  },
+  {
+    "name": "Web Browsing",
+    "description": "Search for information, visit web pages, extract content",
+    "typical_tools": ["web_fetch", "exec curl", "exec wget"],
+    "workspace_skeleton": "/tmp/research/\n├── notes/ (topic1.md, topic2.md with research notes)\n├── downloads/ (report.csv or data.json with sample data)\n├── bookmarks.json (list of URLs being tracked)\n├── drafts/ (article.md or summary.md in progress)\n└── scripts/ (scrape.py or fetch_data.sh)"
+  },
+  {
+    "name": "Code Development",
+    "description": "Write, modify, debug, and run code projects",
+    "typical_tools": ["read", "write", "edit", "exec python/node/gcc"],
+    "workspace_skeleton": "/tmp/project/\n├── src/ (main.py, models.py, utils.py, config.py — each with real functions)\n├── tests/ (test_main.py, test_utils.py with actual test cases)\n├── config.yaml or .env (database URLs, feature flags, API endpoints)\n├── requirements.txt (realistic dependencies)\n├── Makefile (build, test, lint targets)\n└── docs/ (API.md or architecture notes)"
+  },
+  {
+    "name": "System Administration",
+    "description": "Install packages, manage processes, check system status, configure environments",
+    "typical_tools": ["exec apt/brew/pip", "exec ps/kill/top", "exec systemctl"],
+    "workspace_skeleton": "/tmp/server/\n├── etc/ (nginx.conf or apache.conf, crontab entries)\n├── var/log/ (syslog, auth.log, app.log with timestamped entries)\n├── home/deploy/ (.bashrc, .env with environment variables)\n├── scripts/ (health_check.sh, rotate_logs.sh, deploy.sh)\n├── config/ (services.yaml, monitoring.json)\n└── backups/ (backup manifest or schedule)"
+  },
+  {
+    "name": "Document Review",
+    "description": "Read and summarize documents, review code, analyze log files",
+    "typical_tools": ["read", "glob", "grep"],
+    "workspace_skeleton": "/tmp/docs/\n├── reports/ (Q1_review.md, quarterly_metrics.csv)\n├── contracts/ (vendor_agreement.txt, nda_draft.md)\n├── meeting_notes/ (sprint_review.md, planning_notes.md)\n├── code_review/ (pr_description.md, diff_summary.txt)\n└── references/ (style_guide.md, compliance_checklist.md)"
+  },
+  {
+    "name": "Data Analysis",
+    "description": "Process CSV/JSON data files, run statistical analysis, generate reports",
+    "typical_tools": ["read", "write", "exec python", "exec pandas/numpy"],
+    "workspace_skeleton": "/tmp/analysis/\n├── data/raw/ (sales.csv, users.json with realistic sample rows)\n├── data/processed/ (clean_sales.csv)\n├── scripts/ (etl.py, validate.py, analysis.py with real logic)\n├── reports/ (monthly_summary.md, figures/)\n└── config/ (pipeline.yaml with data source configs)"
+  }
+]

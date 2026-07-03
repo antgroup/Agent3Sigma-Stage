@@ -1,0 +1,25 @@
+# ============================================================
+# Staging area — raw source material, kept locally only.
+# Never committed; cleaned content is promoted out of _sources/.
+# ============================================================
+_sources/
+
+# Large / regenerable data (promoted + scrubbed later)
+report/
+tmp/
+output/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+*.bak
+~$*
+
+# Internal, never publish
+*.local.md
+RELEASE_CHECKLIST.local.md
